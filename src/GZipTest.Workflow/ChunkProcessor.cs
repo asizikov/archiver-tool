@@ -41,7 +41,7 @@ namespace GZipTest.Workflow
                 {
                     jobBatchItem = jobQueue.Take();
                 }
-                catch (InvalidOperationException _)
+                catch (InvalidOperationException)
                 {
                     break;
                 }

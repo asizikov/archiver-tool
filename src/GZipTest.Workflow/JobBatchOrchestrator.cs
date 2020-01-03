@@ -37,13 +37,14 @@ namespace GZipTest.Workflow
             using (var countdown = new CountdownEvent(1))
             {
                 using var cancellationTokenSource = new CancellationTokenSource();
-                using var jobQueue = new BlockingCollection<JobBatchItem>(new ConcurrentQueue<JobBatchItem>(),1000);
+                using var jobQueue = new BlockingCollection<JobBatchItem>(new ConcurrentQueue<JobBatchItem>(), 1000);
 
                 for (var i = 0; i < chunkProcessorPool.Length; i++)
                 {
-                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, countdown); 
+                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, countdown);
                     chunkProcessorPool[i].Start(cancellationTokenSource.Token);
                 }
+
                 var jobProducer = jobProducerFactory.Create(description.InputFile, jobQueue, countdown);
                 jobProducer.Start(cancellationTokenSource);
 
@@ -51,14 +52,7 @@ namespace GZipTest.Workflow
                 countdown.Wait();
             }
 
-            if (jobContext.Result == ExecutionResult.Failure)
-            {
-                logger.LogInformation($"Failed to process file due to an error: {jobContext.Error}");
-            }
-            else
-            {
-                logger.LogInformation($"Completed file in {stopWatch.ElapsedMilliseconds} ms");
-            }
+            jobContext.ElapsedTimeMilliseconds = stopWatch.ElapsedMilliseconds;
         }
     }
 }

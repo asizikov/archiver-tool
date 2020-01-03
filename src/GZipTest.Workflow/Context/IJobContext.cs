@@ -4,5 +4,6 @@
     {
         ExecutionResult Result { get; set; }
         string Error { get; set; }
+        long ElapsedTimeMilliseconds { get; set; }
     }
 }

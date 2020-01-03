@@ -1,5 +1,8 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using GZipTest.CommandLineArguments;
 using GZipTest.Workflow;
+using GZipTest.Workflow.Context;
 using GZipTest.Workflow.JobConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -8,29 +11,46 @@ namespace GZipTest.Application
 {
     public class ApplicationFlow : IApplicationFlow
     {
-        private readonly IConfiguration configuration;
         private readonly ILogger<ApplicationFlow> logger;
+        private readonly IConfiguration configuration;
         private readonly IJobBatchOrchestrator jobBatchOrchestrator;
+        private readonly ICommandLineValidator commandLineValidator;
+        private readonly IArgumentsParser argumentsParser;
+        private readonly IJobContext jobContext;
 
-        public ApplicationFlow(IConfiguration configuration, ILogger<ApplicationFlow> logger, IJobBatchOrchestrator jobBatchOrchestrator)
+        public ApplicationFlow(IConfiguration configuration,
+            ILogger<ApplicationFlow> logger,
+            IJobBatchOrchestrator jobBatchOrchestrator,
+            ICommandLineValidator commandLineValidator,
+            IArgumentsParser argumentsParser,
+            IJobContext jobContext)
         {
+            this.commandLineValidator = commandLineValidator;
+            this.argumentsParser = argumentsParser;
+            this.jobContext = jobContext;
             this.configuration = configuration;
             this.logger = logger;
             this.jobBatchOrchestrator = jobBatchOrchestrator;
         }
+
         public void Run(string[] args)
         {
             logger.LogInformation($"Application started with {string.Join(",", args)}");
-            jobBatchOrchestrator.StartProcess(new JobDescription
+            var validationResult = commandLineValidator.Validate(args);
+            if (!validationResult.IsValid)
             {
-                Operation = Operation.Compress,
-                InputFile = new FileInfo(@"C:\file.blah")
-            });
-            // Parse command args
-            // Print help if needed
-            // Start process
-            // Report process
-            // report result
+                logger.LogInformation($"invalid command line arguments {string.Join(Environment.NewLine, validationResult.Errors)}");
+                PrintHelp();
+                return;
+            }
+
+            var jobDescription = argumentsParser.Parse(args);
+            jobBatchOrchestrator.StartProcess(jobDescription);
+            logger.LogInformation(jobContext.Result == ExecutionResult.Failure
+                ? $"Failed to process file due to an error: {jobContext.Error}"
+                : $"Completed file in {jobContext.ElapsedTimeMilliseconds} ms");
+
+            void PrintHelp() => logger.LogInformation(Constants.Help);
         }
     }
 }
