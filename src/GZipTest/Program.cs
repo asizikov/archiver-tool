@@ -18,7 +18,7 @@ namespace GZipTest
             var serviceProvider = services.BuildServiceProvider();
             serviceProvider.GetService<IApplicationFlow>().Run(args);
             Console.ReadLine();
-            return (int)ExecutionResult.SUCCESS;
+            return (int)ExecutionResult.Success;
         }
 
         private static IServiceCollection ConfigureServices()

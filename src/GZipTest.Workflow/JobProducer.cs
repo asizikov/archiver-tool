@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using GZipTest.IO;
+using GZipTest.Workflow.Context;
 
 namespace GZipTest.Workflow
 {
@@ -55,7 +56,7 @@ namespace GZipTest.Workflow
             catch (IOException e)
             {
                 jobContext.Error = e.Message;
-                jobContext.Result = ExecutionResult.FAILURE;
+                jobContext.Result = ExecutionResult.Failure;
                 cancellationTokenSource.Cancel();
             }
 

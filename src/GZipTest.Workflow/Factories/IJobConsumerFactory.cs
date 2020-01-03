@@ -1,7 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
 
-namespace GZipTest.Workflow
+namespace GZipTest.Workflow.Factories
 {
     public interface IJobConsumerFactory
     {

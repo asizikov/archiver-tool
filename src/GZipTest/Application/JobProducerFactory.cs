@@ -3,6 +3,8 @@ using System.IO;
 using System.Threading;
 using GZipTest.IO;
 using GZipTest.Workflow;
+using GZipTest.Workflow.Context;
+using GZipTest.Workflow.Factories;
 
 namespace GZipTest.Application
 {

@@ -1,4 +1,4 @@
-﻿namespace GZipTest.Workflow
+﻿namespace GZipTest.Workflow.Context
 {
     public sealed class JobContext : IJobContext
     {

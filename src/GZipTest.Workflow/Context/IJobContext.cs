@@ -1,4 +1,4 @@
-﻿namespace GZipTest.Workflow
+﻿namespace GZipTest.Workflow.Context
 {
     public interface IJobContext
     {

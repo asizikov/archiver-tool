@@ -1,4 +1,4 @@
-﻿using GZipTest.Workflow;
+﻿using GZipTest.Workflow.Factories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GZipTest.Application

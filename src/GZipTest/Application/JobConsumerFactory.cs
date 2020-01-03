@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
 using GZipTest.Workflow;
+using GZipTest.Workflow.Factories;
 
 namespace GZipTest.Application
 {

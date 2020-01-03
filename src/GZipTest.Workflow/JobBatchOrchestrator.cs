@@ -1,6 +1,8 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
+using GZipTest.Workflow.Context;
+using GZipTest.Workflow.Factories;
 using GZipTest.Workflow.JobConfiguration;
 using Microsoft.Extensions.Logging;
 
@@ -49,7 +51,7 @@ namespace GZipTest.Workflow
                 countdown.Wait();
             }
 
-            if (jobContext.Result == ExecutionResult.FAILURE)
+            if (jobContext.Result == ExecutionResult.Failure)
             {
                 logger.LogInformation($"Failed to process file due to an error: {jobContext.Error}");
             }

@@ -2,7 +2,7 @@
 {
     public enum ExecutionResult : int
     {
-        SUCCESS = 0,
-        FAILURE = 1
+        Success = 0,
+        Failure = 1
     }
 }
