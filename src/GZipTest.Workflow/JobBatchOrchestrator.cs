@@ -1,72 +1,62 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.IO;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Threading;
-using GZipTest.IO;
+using GZipTest.Workflow.JobConfiguration;
+using Microsoft.Extensions.Logging;
 
 namespace GZipTest.Workflow
 {
     public class JobBatchOrchestrator : IJobBatchOrchestrator
     {
-        private readonly IFileReader fileReader;
-        private readonly IOutputBuffer outputBuffer;
-        private readonly JobQueue queue;
-        private readonly Thread[] chunkProcessorThreadPool;
-        private Thread fileReaderThread;
+        private readonly IJobProducerFactory jobProducerFactory;
+        private readonly ILogger<JobBatchOrchestrator> logger;
+        private readonly IJobConsumerFactory jobConsumerFactory;
+        private readonly IJobContext jobContext;
+        private readonly ChunkProcessor[] chunkProcessorPool;
 
-        public JobBatchOrchestrator(IFileReader fileReader, IOutputBuffer outputBuffer)
+        public JobBatchOrchestrator(IJobProducerFactory jobProducerFactory,
+            IJobConsumerFactory jobConsumerFactory,
+            IJobContext jobContext,
+            ILogger<JobBatchOrchestrator> logger)
         {
-            this.fileReader = fileReader;
-            this.outputBuffer = outputBuffer;
-            queue = new JobQueue(100);
-            chunkProcessorThreadPool = new Thread[10];
-
-            var fileReaderThreadWork = new FileReaderThreadWork(fileReader, queue, new FileInfo("testFile.bin"));
-            fileReaderThread = new Thread(fileReaderThreadWork.Run);
-            ConfigureChunkProcessorThreads();
+            this.jobProducerFactory = jobProducerFactory;
+            this.logger = logger;
+            this.jobConsumerFactory = jobConsumerFactory;
+            this.jobContext = jobContext;
+            chunkProcessorPool = new ChunkProcessor[100];
         }
 
-        private void ConfigureChunkProcessorThreads()
+        public void StartProcess(JobDescription description)
         {
-            for (int i = 0; i < chunkProcessorThreadPool.Length; i++)
+            var stopWatch = Stopwatch.StartNew();
+            logger.LogInformation(
+                $"Ready to perform operation: {description.Operation} on file {description.InputFile.Name}");
+
+            using (var countdown = new CountdownEvent(1))
             {
-                var processor = new ChunkProcessor(queue);
-                var chunkProcessorThread = new Thread(processor.Run);
-                chunkProcessorThreadPool[i] = chunkProcessorThread;
+                using var cancellationTokenSource = new CancellationTokenSource();
+                using var jobQueue = new BlockingCollection<JobBatchItem>(1000);
+
+                for (var i = 0; i < chunkProcessorPool.Length; i++)
+                {
+                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, countdown); 
+                    chunkProcessorPool[i].Start(cancellationTokenSource.Token);
+                }
+                var jobProducer = jobProducerFactory.Create(description.InputFile, jobQueue, countdown);
+                jobProducer.Start(cancellationTokenSource);
+
+                countdown.Signal();
+                countdown.Wait();
+            }
+
+            if (jobContext.Result == ExecutionResult.FAILURE)
+            {
+                logger.LogInformation($"Failed to process file due to an error: {jobContext.Error}");
+            }
+            else
+            {
+                logger.LogInformation($"Completed file in {stopWatch.ElapsedMilliseconds} ms");
             }
         }
-
-        private void JobProcessorLoop()
-        {
-            while (completed)
-            {
-                LoadInputBuffer();
-                ProcessBatch();
-                FlushOutputBuffer();
-            }
-        }
-
-        private void FlushOutputBuffer()
-        {
-            outputBuffer.Flush();
-        }
-
-        private void ProcessBatch()
-        {
-            foreach (var thread in chunkProcessorThreadPool)
-            {
-                thread.Start();
-            }
-        }
-
-        private void LoadInputBuffer()
-        {
-            fileReaderThread.Start();
-        }
-    }
-
-    public interface IOutputBuffer
-    {
-        void Flush();
     }
 }

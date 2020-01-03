@@ -1,7 +1,9 @@
-﻿namespace GZipTest.Workflow
+﻿using GZipTest.Workflow.JobConfiguration;
+
+namespace GZipTest.Workflow
 {
     public interface IJobBatchOrchestrator
     {
-        void StartProcess();
+        void StartProcess(JobDescription jobDescription);
     }
 }

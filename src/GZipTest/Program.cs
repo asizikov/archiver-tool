@@ -2,6 +2,7 @@
 using System.IO;
 using GZipTest.Application;
 using GZipTest.IO.DependencyInjection;
+using GZipTest.Workflow;
 using GZipTest.Workflow.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,7 +18,7 @@ namespace GZipTest
             var serviceProvider = services.BuildServiceProvider();
             serviceProvider.GetService<IApplicationFlow>().Run(args);
             Console.ReadLine();
-            return ExecutionResult.SUCCESS;
+            return (int)ExecutionResult.SUCCESS;
         }
 
         private static IServiceCollection ConfigureServices()
@@ -26,6 +27,7 @@ namespace GZipTest
             var serviceCollection = new ServiceCollection()
                 .AddWorkflowServices()
                 .AddIOServices()
+                .AddApplicationServices()
                 .AddLogging(logging =>
             {
                 logging.AddConfiguration(config.GetSection("Logging"));
