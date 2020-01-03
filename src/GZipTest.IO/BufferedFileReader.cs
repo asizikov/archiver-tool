@@ -10,14 +10,11 @@ namespace GZipTest.IO
         
         public IEnumerable<byte[]> Read(FileInfo path)
         {
-            int count = 0;
             using var fileStream = path.OpenRead();
             var buffer = new byte[SIZE];
             var bufferSize = fileStream.Read(buffer, 0 , buffer.Length);
             while (bufferSize > 0)
             {
-                count++;
-                if(count == 10) throw new IOException("boo");
                 if (bufferSize == SIZE)
                 {
                     yield return buffer;

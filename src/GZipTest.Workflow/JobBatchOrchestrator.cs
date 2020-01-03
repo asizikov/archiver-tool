@@ -37,7 +37,7 @@ namespace GZipTest.Workflow
             using (var countdown = new CountdownEvent(1))
             {
                 using var cancellationTokenSource = new CancellationTokenSource();
-                using var jobQueue = new BlockingCollection<JobBatchItem>(1000);
+                using var jobQueue = new BlockingCollection<JobBatchItem>(new ConcurrentQueue<JobBatchItem>(),1000);
 
                 for (var i = 0; i < chunkProcessorPool.Length; i++)
                 {
