@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.Workflow", "..\src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.Workflow.Tests", "..\tests\GZipTest.Workflow.Tests\GZipTest.Workflow.Tests.csproj", "{A05197E7-CFBA-4E43-8E05-7FE0593B9AF4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GZipTest.IO", "..\src\GZipTest.IO\GZipTest.IO.csproj", "{9D8F7123-DFF1-43A6-AA09-40900771DFAE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.IO", "..\src\GZipTest.IO\GZipTest.IO.csproj", "{9D8F7123-DFF1-43A6-AA09-40900771DFAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GZipTest.Tests", "..\tests\GZipTest.Tests\GZipTest.Tests.csproj", "{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,12 +37,17 @@ Global
 		{9D8F7123-DFF1-43A6-AA09-40900771DFAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D8F7123-DFF1-43A6-AA09-40900771DFAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D8F7123-DFF1-43A6-AA09-40900771DFAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A05197E7-CFBA-4E43-8E05-7FE0593B9AF4} = {DB6D3839-2EEA-4713-B731-2430AD224FE8}
+		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B} = {DB6D3839-2EEA-4713-B731-2430AD224FE8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {57E5F1DC-912A-45A5-B635-3B0ECCD75AF7}
