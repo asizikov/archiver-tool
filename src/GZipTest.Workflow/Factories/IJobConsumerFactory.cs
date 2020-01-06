@@ -5,6 +5,6 @@ namespace GZipTest.Workflow.Factories
 {
     public interface IJobConsumerFactory
     {
-        ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, CountdownEvent countdown);
+        ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown);
     }
 }

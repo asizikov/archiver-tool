@@ -11,7 +11,7 @@ namespace GZipTest.Workflow.Tests
 
         public OutputBufferTests()
         {
-            buffer = new OutputBuffer();
+            buffer = null; //new OutputBuffer();
         }
 
         [Fact]

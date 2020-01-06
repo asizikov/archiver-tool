@@ -5,5 +5,7 @@
         ExecutionResult Result { get; set; }
         string Error { get; set; }
         long ElapsedTimeMilliseconds { get; set; }
+        long SubmittedId { get; set; }
+        long ProcessedId { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
 using GZipTest.IO;
@@ -50,6 +49,7 @@ namespace GZipTest.Workflow
                         Buffer = chunk,
                         JobBatchItemId = batchItemId
                     });
+                    jobContext.SubmittedId = batchItemId;
                     Interlocked.Increment(ref batchItemId);
                 }
             }

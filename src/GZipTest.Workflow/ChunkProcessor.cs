@@ -49,17 +49,15 @@ namespace GZipTest.Workflow
                 if (jobBatchItem != null)
                 {
                     var sw = Stopwatch.StartNew();
-                    Console.WriteLine($"{workThread.ManagedThreadId}: running chunk {jobBatchItem.JobBatchItemId}");
                     Thread.Sleep(500);
                     jobBatchItem.Processed = jobBatchItem.Buffer;
                     jobBatchItem.ElapsedTime = sw.ElapsedMilliseconds;
-                    Console.WriteLine(
-                        $"processed chunk {jobBatchItem.JobBatchItemId} in {jobBatchItem.ElapsedTime} ms");
                     //compress
                     outputBuffer.SubmitProcessedBatchItem(jobBatchItem);
                 }
             }
 
+            outputBuffer.SubmitCompleted();
             countdown.Signal();
         }
     }

@@ -7,16 +7,7 @@ namespace GZipTest.Application
 {
     public class JobConsumerFactory : IJobConsumerFactory
     {
-        private readonly IOutputBuffer outputBuffer;
-
-        public JobConsumerFactory( IOutputBuffer outputBuffer)
-        {
-            this.outputBuffer = outputBuffer;
-        }
-
-        public ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, CountdownEvent countdown)
-        {
-            return new ChunkProcessor(jobQueue, outputBuffer, countdown);
-        }
+        public ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown) 
+            => new ChunkProcessor(jobQueue, outputBuffer, countdown);
     }
 }

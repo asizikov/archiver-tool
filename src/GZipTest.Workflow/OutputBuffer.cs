@@ -1,32 +1,39 @@
-﻿using System;
-using System.Threading;
-using GZipTest.IO;
+﻿using System.Collections.Concurrent;
 
 namespace GZipTest.Workflow
 {
     public class OutputBuffer : IOutputBuffer
     {
+        private readonly object syncRoot = new object();
+        private int producers;
 
-        private long size = 0;
+        private readonly BlockingCollection<JobBatchItem> processedJobQueue;
 
-        public void SubmitProcessedBatchItem(JobBatchItem processedBatchItem)
+        public OutputBuffer(BlockingCollection<JobBatchItem> processedJobQueue, int count)
         {
-            
-            Interlocked.Add(ref size, processedBatchItem.Processed.LongLength);
-            Console.WriteLine($"submitted processed batch item {processedBatchItem?.JobBatchItemId}, total size {ConvertBytesToMegabytes(size)} mb");
-            //currentBatch[processedBatchItem.JobBatchItemId % currentBatch.Length] = processedBatchItem;
+            producers = count;
+            this.processedJobQueue = processedJobQueue;
         }
 
 
+        public void SubmitProcessedBatchItem(JobBatchItem processedBatchItem) 
+            => processedJobQueue.Add(processedBatchItem);
+
+        public void SubmitCompleted()
+        {
+            lock (syncRoot)
+            {
+                producers--;
+                if (producers == 0)
+                {
+                    processedJobQueue.CompleteAdding();
+                }
+            }
+        }
 
         private static double ConvertBytesToMegabytes(long bytes)
         {
             return (bytes / 1024f) / 1024f;
         }
-    }
-
-    public interface IOutputBuffer
-    {
-        void SubmitProcessedBatchItem(JobBatchItem processedBatchItem);
     }
 }
