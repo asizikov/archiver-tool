@@ -2,7 +2,7 @@
 {
     public interface IOutputBuffer
     {
-        void SubmitProcessedBatchItem(JobBatchItem processedBatchItem);
+        void SubmitProcessedBatchItem(ProcessedBatchItem processedBatchItem);
         void SubmitCompleted();
     }
 }

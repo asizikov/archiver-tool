@@ -7,16 +7,16 @@ namespace GZipTest.Workflow
         private readonly object syncRoot = new object();
         private int producers;
 
-        private readonly BlockingCollection<JobBatchItem> processedJobQueue;
+        private readonly BlockingCollection<ProcessedBatchItem> processedJobQueue;
 
-        public OutputBuffer(BlockingCollection<JobBatchItem> processedJobQueue, int count)
+        public OutputBuffer(BlockingCollection<ProcessedBatchItem> processedJobQueue, int count)
         {
             producers = count;
             this.processedJobQueue = processedJobQueue;
         }
 
 
-        public void SubmitProcessedBatchItem(JobBatchItem processedBatchItem) 
+        public void SubmitProcessedBatchItem(ProcessedBatchItem processedBatchItem) 
             => processedJobQueue.Add(processedBatchItem);
 
         public void SubmitCompleted()

@@ -1,30 +1,38 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.IO;
 using System.Threading;
+using GZipTest.IO;
 using GZipTest.Workflow.Context;
 
 namespace GZipTest.Workflow
 {
     public class ProcessedJobsConsumer
     {
-        private readonly BlockingCollection<JobBatchItem> processedJobQueue;
+        private readonly BlockingCollection<ProcessedBatchItem> processedJobQueue;
         private readonly CountdownEvent countdown;
         private readonly CancellationTokenSource cancellationTokenSource;
-        private readonly CancellationToken cancellationToken;
+       
         private readonly IJobContext jobContext;
+        private readonly IFileWriter fileWriter;
+        private CancellationToken cancellationToken;
+        private FileInfo fileInfo;
 
-        public ProcessedJobsConsumer(BlockingCollection<JobBatchItem> processedJobQueue, IJobContext jobContext, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
+        public ProcessedJobsConsumer(BlockingCollection<ProcessedBatchItem> processedJobQueue, IJobContext jobContext, IFileWriter fileWriter, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
         {
             this.processedJobQueue = processedJobQueue;
             this.jobContext = jobContext;
+            this.fileWriter = fileWriter;
             this.countdown = countdown;
             this.cancellationTokenSource = cancellationTokenSource;
-            cancellationToken = cancellationTokenSource.Token;
         }
 
-        public void Start()
+        public void Start(FileInfo path, CancellationToken cancellationToken)
         {
-            var thread = new Thread(ProcessChunk)
+            this.cancellationToken = cancellationToken;
+            fileInfo = path;
+
+            var thread = new Thread(SaveProcessedChunks)
             {
                 IsBackground = true
             };
@@ -32,32 +40,26 @@ namespace GZipTest.Workflow
             countdown.AddCount();
         }
 
-        private void ProcessChunk()
+        private void SaveProcessedChunks()
         {
             try
             {
-                while (!processedJobQueue.IsCompleted && !cancellationToken.IsCancellationRequested)
+                using var file = fileWriter.OpenFile(fileInfo);
+                foreach (var processedBatchItem in processedJobQueue.GetConsumingEnumerable())
                 {
-                    JobBatchItem jobBatchItem = null;
-                    try
+                    if (!cancellationToken.IsCancellationRequested)
                     {
-                        jobBatchItem = processedJobQueue.Take();
+                        jobContext.ProcessedId = processedBatchItem.JobBatchItemId;
+                        file.Write(processedBatchItem.Processed);
                     }
-                    catch (InvalidOperationException)
+                    else
                     {
-                        continue;
-                    }
-
-                    if (jobBatchItem != null)
-                    {
-                        jobContext.ProcessedId = jobBatchItem.JobBatchItemId;
-                        Console.WriteLine($"Writing processed: {jobBatchItem.JobBatchItemId}/{processedJobQueue.Count}");
+                        break;
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine($"{e.Message}");
                 jobContext.Error = e.Message;
                 jobContext.Result = ExecutionResult.Failure;
                 cancellationTokenSource.Cancel();

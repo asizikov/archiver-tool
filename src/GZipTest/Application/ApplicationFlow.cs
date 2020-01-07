@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using GZipTest.CommandLineArguments;
 using GZipTest.Workflow;
 using GZipTest.Workflow.Context;
-using GZipTest.Workflow.JobConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 

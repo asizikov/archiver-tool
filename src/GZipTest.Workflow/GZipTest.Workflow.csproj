@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\GZipTest.Compression\GZipTest.Compression.csproj" />
     <ProjectReference Include="..\GZipTest.IO\GZipTest.IO.csproj" />
   </ItemGroup>
 

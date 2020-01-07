@@ -13,12 +13,14 @@ namespace GZipTest.Workflow
         private readonly IJobProducerFactory jobProducerFactory;
         private readonly ILogger<JobBatchOrchestrator> logger;
         private readonly IJobConsumerFactory jobConsumerFactory;
+        private readonly IProcessedJobConsumerFactory processedJobConsumerFactory;
         private readonly IOutputBufferFactory outputBufferFactory;
         private readonly IJobContext jobContext;
         private readonly ChunkProcessor[] chunkProcessorPool;
 
         public JobBatchOrchestrator(IJobProducerFactory jobProducerFactory,
             IJobConsumerFactory jobConsumerFactory,
+            IProcessedJobConsumerFactory processedJobConsumerFactory,
             IOutputBufferFactory outputBufferFactory,
             IJobContext jobContext,
             ILogger<JobBatchOrchestrator> logger)
@@ -26,6 +28,7 @@ namespace GZipTest.Workflow
             this.jobProducerFactory = jobProducerFactory;
             this.logger = logger;
             this.jobConsumerFactory = jobConsumerFactory;
+            this.processedJobConsumerFactory = processedJobConsumerFactory;
             this.outputBufferFactory = outputBufferFactory;
             this.jobContext = jobContext;
             chunkProcessorPool = new ChunkProcessor[100];
@@ -40,20 +43,21 @@ namespace GZipTest.Workflow
             using (var countdown = new CountdownEvent(1))
             {
                 using var cancellationTokenSource = new CancellationTokenSource();
-                using var jobQueue = new BlockingCollection<JobBatchItem>(new ConcurrentQueue<JobBatchItem>(), 1000);
-                using var processedJobQueue = new BlockingCollection<JobBatchItem>(new OrderedConcurrentDictionaryWrapper(), 100);
+                using var jobQueue = new BlockingCollection<JobBatchItem>(new ConcurrentQueue<JobBatchItem>(), chunkProcessorPool.Length * 10);
+                using var processedJobQueue = new BlockingCollection<ProcessedBatchItem>(new OrderedConcurrentDictionaryWrapper(), chunkProcessorPool.Length * 10);
 
                 var outputBuffer = outputBufferFactory.Create(processedJobQueue, chunkProcessorPool.Length);
                 for (var i = 0; i < chunkProcessorPool.Length; i++)
                 {
-                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, outputBuffer, countdown);
+                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, outputBuffer, description.Operation, countdown);
                     chunkProcessorPool[i].Start(cancellationTokenSource.Token);
                 }
-                var processedJobsConsumer = new ProcessedJobsConsumer(processedJobQueue, jobContext, countdown, cancellationTokenSource);
-                processedJobsConsumer.Start();
 
-                var jobProducer = jobProducerFactory.Create(description.InputFile, jobQueue, countdown);
-                jobProducer.Start(cancellationTokenSource);
+                processedJobConsumerFactory.Create(processedJobQueue, countdown, cancellationTokenSource)
+                    .Start(description.OutputFile, cancellationTokenSource.Token);
+
+                jobProducerFactory.Create(description.InputFile, jobQueue, countdown)
+                    .Start(cancellationTokenSource);
 
                 countdown.Signal();
                 countdown.Wait();

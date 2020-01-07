@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
+using GZipTest.Compression;
 
 namespace GZipTest.Workflow
 {
@@ -9,15 +10,17 @@ namespace GZipTest.Workflow
     {
         private readonly BlockingCollection<JobBatchItem> jobQueue;
         private readonly IOutputBuffer outputBuffer;
+        private readonly IByteProcessor byteProcessor;
         private readonly CountdownEvent countdown;
         private Thread workThread;
         private CancellationToken cancellationToken;
 
-        public ChunkProcessor(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer,
+        public ChunkProcessor(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, IByteProcessor byteProcessor,
             CountdownEvent countdown)
         {
             this.jobQueue = jobQueue;
             this.outputBuffer = outputBuffer;
+            this.byteProcessor = byteProcessor;
             this.countdown = countdown;
         }
 
@@ -34,27 +37,26 @@ namespace GZipTest.Workflow
 
         private void ProcessChunk()
         {
-            while (!jobQueue.IsCompleted && !cancellationToken.IsCancellationRequested)
+            foreach (var jobBatchItem in jobQueue.GetConsumingEnumerable())
             {
-                JobBatchItem jobBatchItem = null;
+                var processed = new ProcessedBatchItem
+                {
+                    JobBatchItemId = jobBatchItem.JobBatchItemId
+                };
+                //var sw = Stopwatch.StartNew();
                 try
                 {
-                    jobBatchItem = jobQueue.Take();
+                    processed.Processed = byteProcessor.Process(jobBatchItem.Buffer, jobBatchItem.JobBatchItemId);
                 }
-                catch (InvalidOperationException)
+                catch (Exception e)
                 {
-                    break;
+                    Console.WriteLine(e);
+                    throw;
                 }
 
-                if (jobBatchItem != null)
-                {
-                    var sw = Stopwatch.StartNew();
-                    Thread.Sleep(500);
-                    jobBatchItem.Processed = jobBatchItem.Buffer;
-                    jobBatchItem.ElapsedTime = sw.ElapsedMilliseconds;
-                    //compress
-                    outputBuffer.SubmitProcessedBatchItem(jobBatchItem);
-                }
+                //jobBatchItem.ElapsedTime = sw.ElapsedMilliseconds;
+                outputBuffer.SubmitProcessedBatchItem(processed);
+
             }
 
             outputBuffer.SubmitCompleted();

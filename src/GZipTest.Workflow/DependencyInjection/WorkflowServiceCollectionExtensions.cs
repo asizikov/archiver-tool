@@ -10,6 +10,8 @@ namespace GZipTest.Workflow.DependencyInjection
         {
             serviceCollection.AddTransient<IJobBatchOrchestrator, JobBatchOrchestrator>();
             serviceCollection.AddTransient<IOutputBufferFactory, OutputBufferFactory>();
+            serviceCollection.AddTransient<IProcessedJobConsumerFactory, ProcessedJobConsumerFactory>();
+
             serviceCollection.AddSingleton<IJobContext, JobContext>();
 
             return serviceCollection;

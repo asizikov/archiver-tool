@@ -4,6 +4,6 @@ namespace GZipTest.Workflow.Factories
 {
     public interface IOutputBufferFactory
     {
-        IOutputBuffer Create(BlockingCollection<JobBatchItem> processedItemsQueue, int processorsCount);
+        IOutputBuffer Create(BlockingCollection<ProcessedBatchItem> processedItemsQueue, int processorsCount);
     }
 }

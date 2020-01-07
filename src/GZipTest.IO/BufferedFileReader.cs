@@ -6,7 +6,7 @@ namespace GZipTest.IO
 {
     public class BufferedFileReader :IFileReader
     {
-        private const long SIZE = 1024 * 256;
+        private const long SIZE = 1024 * 128;
         
         public IEnumerable<byte[]> Read(FileInfo path)
         {
