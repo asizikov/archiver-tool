@@ -10,10 +10,10 @@ namespace GZipTest.Application
 {
     public class JobProducerFactory : IJobProducerFactory
     {
-        private readonly IFileReader fileReader;
+        private readonly IFileReaderFactory fileReader;
         private readonly IJobContext jobContext;
 
-        public JobProducerFactory(IFileReader fileReader, IJobContext jobContext)
+        public JobProducerFactory(IFileReaderFactory fileReader, IJobContext jobContext)
         {
             this.fileReader = fileReader;
             this.jobContext = jobContext;

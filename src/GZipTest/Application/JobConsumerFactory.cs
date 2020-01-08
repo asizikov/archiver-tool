@@ -2,6 +2,7 @@
 using System.Threading;
 using GZipTest.Compression;
 using GZipTest.Workflow;
+using GZipTest.Workflow.Context;
 using GZipTest.Workflow.Factories;
 using GZipTest.Workflow.JobConfiguration;
 
@@ -9,9 +10,16 @@ namespace GZipTest.Application
 {
     public class JobConsumerFactory : IJobConsumerFactory
     {
-        public ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, Operation operation, CountdownEvent countdown)
+        private readonly IJobContext jobContext;
+
+        public JobConsumerFactory(IJobContext jobContext)
         {
-            var processor = operation == Operation.Compress ? new Compressor() as IByteProcessor : new Decompressor();
+            this.jobContext = jobContext;
+        }
+
+        public ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown)
+        {
+            var processor = jobContext.Operation == Operation.Compress ? new Compressor() as IByteProcessor : new Decompressor();
             return new ChunkProcessor(jobQueue, outputBuffer, processor, countdown);
         }
     }

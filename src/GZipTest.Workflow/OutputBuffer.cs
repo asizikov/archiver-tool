@@ -30,10 +30,5 @@ namespace GZipTest.Workflow
                 }
             }
         }
-
-        private static double ConvertBytesToMegabytes(long bytes)
-        {
-            return (bytes / 1024f) / 1024f;
-        }
     }
 }

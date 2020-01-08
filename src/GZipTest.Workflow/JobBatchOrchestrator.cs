@@ -40,6 +40,8 @@ namespace GZipTest.Workflow
             logger.LogInformation(
                 $"Ready to perform operation: {description.Operation} on file {description.InputFile.Name}");
 
+            jobContext.Operation = description.Operation;
+
             using (var countdown = new CountdownEvent(1))
             {
                 using var cancellationTokenSource = new CancellationTokenSource();
@@ -49,7 +51,7 @@ namespace GZipTest.Workflow
                 var outputBuffer = outputBufferFactory.Create(processedJobQueue, chunkProcessorPool.Length);
                 for (var i = 0; i < chunkProcessorPool.Length; i++)
                 {
-                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, outputBuffer, description.Operation, countdown);
+                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, outputBuffer, countdown);
                     chunkProcessorPool[i].Start(cancellationTokenSource.Token);
                 }
 

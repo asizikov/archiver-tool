@@ -6,7 +6,7 @@ namespace GZipTest.IO.DependencyInjection
     {
         public static IServiceCollection AddIOServices(this IServiceCollection serviceCollection)
         {
-            serviceCollection.AddTransient<IFileReader, BufferedFileReader>();
+            serviceCollection.AddTransient<IFileReaderFactory, FileReaderFactory>();
             serviceCollection.AddTransient<IFileWriter, FileWriter>();
             return serviceCollection;
         }

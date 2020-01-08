@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using GZipTest.Compression;
 
@@ -39,24 +38,27 @@ namespace GZipTest.Workflow
         {
             foreach (var jobBatchItem in jobQueue.GetConsumingEnumerable())
             {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+
                 var processed = new ProcessedBatchItem
                 {
                     JobBatchItemId = jobBatchItem.JobBatchItemId
                 };
-                //var sw = Stopwatch.StartNew();
                 try
                 {
-                    processed.Processed = byteProcessor.Process(jobBatchItem.Buffer, jobBatchItem.JobBatchItemId);
+                    processed.Processed = byteProcessor.Process(jobBatchItem.Buffer);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    throw;
                 }
-
-                //jobBatchItem.ElapsedTime = sw.ElapsedMilliseconds;
-                outputBuffer.SubmitProcessedBatchItem(processed);
-
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    outputBuffer.SubmitProcessedBatchItem(processed);
+                }
             }
 
             outputBuffer.SubmitCompleted();

@@ -1,10 +1,13 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace GZipTest.CommandLineArguments
 {
     public sealed class CommandLineValidator : ICommandLineValidator
     {
+        private readonly ISet<string> expectedCommands = new HashSet<string>(new[] { "compress", "decompress" });
+
         public ValidationResult Validate(string[] args)
         {
             var result = new ValidationResult();
@@ -18,7 +21,7 @@ namespace GZipTest.CommandLineArguments
             if (args.Length > 0)
             {
                 var command = args[0].ToLower();
-                if (command != "compress" || command != "decompress")
+                if (!expectedCommands.Contains(command))
                 {
                     result.Errors.Add(Constants.ValidationErrors.UnknownCommand);
                 }
@@ -50,7 +53,7 @@ namespace GZipTest.CommandLineArguments
                 }
             }
 
-            result.IsValid = result.Errors.Count > 0;
+            result.IsValid = result.Errors.Count == 0;
             return result;
         }
     }

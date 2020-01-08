@@ -3,12 +3,13 @@ using System.IO;
 using System.Threading;
 using GZipTest.IO;
 using GZipTest.Workflow.Context;
+using GZipTest.Workflow.JobConfiguration;
 
 namespace GZipTest.Workflow
 {
     public class JobProducer
     {
-        private readonly IFileReader fileReader;
+        private readonly IFileReaderFactory fileReaderFactory;
         private readonly IJobContext jobContext;
         private readonly BlockingCollection<JobBatchItem> queue;
         private readonly FileInfo fileInfo;
@@ -17,10 +18,10 @@ namespace GZipTest.Workflow
         private long batchItemId = 0;
         private CancellationTokenSource cancellationTokenSource;
 
-        public JobProducer(IFileReader fileReader, IJobContext jobContext, BlockingCollection<JobBatchItem> queue, FileInfo fileInfo,
+        public JobProducer(IFileReaderFactory fileReaderFactory, IJobContext jobContext, BlockingCollection<JobBatchItem> queue, FileInfo fileInfo,
             CountdownEvent countdown)
         {
-            this.fileReader = fileReader;
+            this.fileReaderFactory = fileReaderFactory;
             this.jobContext = jobContext;
             this.queue = queue;
             this.fileInfo = fileInfo;
@@ -40,6 +41,8 @@ namespace GZipTest.Workflow
 
         private void ProcessChunk()
         {
+            var fileReader = fileReaderFactory.Create(jobContext.Operation == Operation.Decompress);
+
             try
             {
                 foreach (var chunk in fileReader.Read(fileInfo))
@@ -55,13 +58,14 @@ namespace GZipTest.Workflow
             }
             catch (IOException e)
             {
-                jobContext.Error = e.Message;
-                jobContext.Result = ExecutionResult.Failure;
+                jobContext.Failure(e, e.Message);
                 cancellationTokenSource.Cancel();
             }
-
+            finally
+            {
+                countdown.Signal();
+            }
             queue.CompleteAdding();
-            countdown.Signal();
         }
     }
 }

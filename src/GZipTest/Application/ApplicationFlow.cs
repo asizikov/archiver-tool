@@ -45,7 +45,7 @@ namespace GZipTest.Application
             var jobDescription = argumentsParser.Parse(args);
             jobBatchOrchestrator.StartProcess(jobDescription);
             logger.LogInformation(jobContext.Result == ExecutionResult.Failure
-                ? $"Failed to process file due to an error: {jobContext.Error}"
+                ? $"Failed to process file due to an error: {jobContext.Error} reported by {jobContext.ReportedBy}"
                 : $"Completed file in {jobContext.ElapsedTimeMilliseconds} ms");
 
             void PrintHelp() => logger.LogInformation(Constants.Help);

@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using GZipTest.IO;
 using GZipTest.Workflow.Context;
+using GZipTest.Workflow.JobConfiguration;
 
 namespace GZipTest.Workflow
 {
@@ -44,7 +45,7 @@ namespace GZipTest.Workflow
         {
             try
             {
-                using var file = fileWriter.OpenFile(fileInfo);
+                using var file = fileWriter.OpenFile(fileInfo, jobContext.Operation == Operation.Decompress);
                 foreach (var processedBatchItem in processedJobQueue.GetConsumingEnumerable())
                 {
                     if (!cancellationToken.IsCancellationRequested)
@@ -60,8 +61,7 @@ namespace GZipTest.Workflow
             }
             catch (Exception e)
             {
-                jobContext.Error = e.Message;
-                jobContext.Result = ExecutionResult.Failure;
+                jobContext.Failure(e, e.Message);
                 cancellationTokenSource.Cancel();
             }
             finally

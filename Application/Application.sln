@@ -13,7 +13,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.Workflow.Tests", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.IO", "..\src\GZipTest.IO\GZipTest.IO.csproj", "{9D8F7123-DFF1-43A6-AA09-40900771DFAE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GZipTest.Tests", "..\tests\GZipTest.Tests\GZipTest.Tests.csproj", "{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.Tests", "..\tests\GZipTest.Tests\GZipTest.Tests.csproj", "{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.Compression", "..\src\GZipTest.Compression\GZipTest.Compression.csproj", "{3214B8DD-82FA-46C1-A961-C07911F3D4DC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GZipTest.Compression.Tests", "..\tests\GZipTest.Compression.Tests\GZipTest.Compression.Tests.csproj", "{7903477A-E5EC-40B3-9DA4-1B115912CBD3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GZipTest.Workflow.IntegrationTests", "..\tests\GZipTest.Workflow.IntegrationTests\GZipTest.Workflow.IntegrationTests.csproj", "{DDDDD8F8-0804-4EA8-BC6F-CDA432B69AFE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,6 +47,18 @@ Global
 		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3214B8DD-82FA-46C1-A961-C07911F3D4DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3214B8DD-82FA-46C1-A961-C07911F3D4DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3214B8DD-82FA-46C1-A961-C07911F3D4DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3214B8DD-82FA-46C1-A961-C07911F3D4DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7903477A-E5EC-40B3-9DA4-1B115912CBD3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7903477A-E5EC-40B3-9DA4-1B115912CBD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7903477A-E5EC-40B3-9DA4-1B115912CBD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7903477A-E5EC-40B3-9DA4-1B115912CBD3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDDDD8F8-0804-4EA8-BC6F-CDA432B69AFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDDDD8F8-0804-4EA8-BC6F-CDA432B69AFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDDDD8F8-0804-4EA8-BC6F-CDA432B69AFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDDDD8F8-0804-4EA8-BC6F-CDA432B69AFE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -48,6 +66,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A05197E7-CFBA-4E43-8E05-7FE0593B9AF4} = {DB6D3839-2EEA-4713-B731-2430AD224FE8}
 		{E9E4B11B-65AC-4A3E-AAAE-48FA2A8D639B} = {DB6D3839-2EEA-4713-B731-2430AD224FE8}
+		{7903477A-E5EC-40B3-9DA4-1B115912CBD3} = {DB6D3839-2EEA-4713-B731-2430AD224FE8}
+		{DDDDD8F8-0804-4EA8-BC6F-CDA432B69AFE} = {DB6D3839-2EEA-4713-B731-2430AD224FE8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {57E5F1DC-912A-45A5-B635-3B0ECCD75AF7}

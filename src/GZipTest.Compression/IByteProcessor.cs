@@ -2,6 +2,6 @@
 {
     public interface IByteProcessor
     {
-        byte[] Process(byte[] input, long id);
+        byte[] Process(byte[] input);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using GZipTest.Workflow.Tests.Utils;
+﻿using System.Collections.Concurrent;
 using Shouldly;
 using Xunit;
 
@@ -8,39 +7,25 @@ namespace GZipTest.Workflow.Tests
     public class OutputBufferTests
     {
         private readonly OutputBuffer buffer;
+        private readonly int workers = 100;
+        private readonly BlockingCollection<ProcessedBatchItem> queue = new BlockingCollection<ProcessedBatchItem>();
 
         public OutputBufferTests()
         {
-            buffer = null; //new OutputBuffer();
+            buffer = new OutputBuffer(queue, workers);
         }
 
         [Fact]
-        public void BatchItemsSubmittedInOrder()
+        public void CompletesWorkWhenAllWorkersAreDone()
         {
-            var list = new List<JobBatchItem>();
-            var upper = 1000;
-            var lower = 123L;
-
-            for (var i = lower; i <= upper; i++)
+            queue.IsCompleted.ShouldBeFalse();
+            for (var i = 0; i < workers -1; i++)
             {
-                list.Add(new JobBatchItem
-                {
-                    JobBatchItemId = i
-                });
+                buffer.SubmitCompleted();
             }
-
-
-            list.Shuffle();
-            foreach (var jobBatchItem in list)
-            {
-                buffer.SubmitProcessedBatchItem(jobBatchItem);
-            }
-
-            var expected = lower;
-            for (var i = 0L; i < (lower - upper); i++)
-            {
-                expected++;
-            }
+            queue.IsCompleted.ShouldBeFalse();
+            buffer.SubmitCompleted();
+            queue.IsCompleted.ShouldBeTrue();
         }
     }
 }

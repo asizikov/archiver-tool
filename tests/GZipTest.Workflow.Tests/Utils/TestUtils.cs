@@ -7,7 +7,7 @@ namespace GZipTest.Workflow.Tests.Utils
     {
         private static Random rng = new Random();
 
-        public static void Shuffle<T>(this IList<T> list) where T : class
+        public static void Shuffle<T>(this IList<T> list)
         {
             var n = list.Count;
             while (n > 1)

@@ -2,7 +2,7 @@
   "profiles": {
     "GZipTest": {
       "commandName": "Project",
-      "commandLineArgs": "compress \"\\\\Mac\\Home\\Downloads\\MICROSOFT_PRESS_EBOOK_CREATINGMOBILEAPPSWITHXAMARINFORMS_PDF.PDF\" \"\\\\Mac\\Home\\Downloads\\sql-toolbelt-compressed.gz\""
+      "commandLineArgs": "decompress  \"\\\\Mac\\Home\\Downloads\\sql-toolbelt-compressed.gz\"  \"\\\\Mac\\Home\\Downloads\\Designing Data-Intensive Applications2.pdf\" "
     }
   }
 }

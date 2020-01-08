@@ -3,16 +3,14 @@ using System.IO.Compression;
 
 namespace GZipTest.Compression
 {
-    public class Compressor : IByteProcessor
+    public sealed class Compressor : IByteProcessor
     {
-        public byte[] Process(byte[] input, long id)
+        public byte[] Process(byte[] input)
         {
             using var compressedMemoryStream = new MemoryStream();
-            using (var gzipStream = new GZipStream(compressedMemoryStream, CompressionMode.Compress))
-            {
-                gzipStream.Write(input, 0, input.Length);
-            }
-
+            using var zipStream = new GZipStream(compressedMemoryStream, CompressionMode.Compress);
+            zipStream.Write(input, 0, input.Length);
+            zipStream.Close();
             return compressedMemoryStream.ToArray();
         }
     }
