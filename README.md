@@ -15,6 +15,15 @@ dotnet test
 
 ## How to run
 
+on Unix/MacOS:
+
 ```
-dotnet run GZipTest compress "/path/to/source.file" "/path/to/compressed/file"
+dotnet run GZipTest [compress|decompress] "/path/to/source.file" "/path/to/processed/file"
 ```
+
+on Windows:
+
+```
+GZipTest.exe [compress|decompress] "C:\path\to the source.file" "C:\path\to processed.bin"
+```
+
