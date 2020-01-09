@@ -17,10 +17,10 @@ namespace GZipTest.Application
             this.jobContext = jobContext;
         }
 
-        public ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown)
+        public ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
         {
             var processor = jobContext.Operation == Operation.Compress ? new Compressor() as IByteProcessor : new Decompressor();
-            return new ChunkProcessor(jobQueue, outputBuffer, processor, countdown);
+            return new ChunkProcessor(jobQueue, outputBuffer, processor, jobContext, cancellationTokenSource, countdown);
         }
     }
 }

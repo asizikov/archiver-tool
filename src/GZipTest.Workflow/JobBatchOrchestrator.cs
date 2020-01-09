@@ -51,7 +51,7 @@ namespace GZipTest.Workflow
                 var outputBuffer = outputBufferFactory.Create(processedJobQueue, chunkProcessorPool.Length);
                 for (var i = 0; i < chunkProcessorPool.Length; i++)
                 {
-                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, outputBuffer, countdown);
+                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, outputBuffer, countdown, cancellationTokenSource);
                     chunkProcessorPool[i].Start(cancellationTokenSource.Token);
                 }
 

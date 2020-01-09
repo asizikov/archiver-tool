@@ -1,8 +1,7 @@
 {
   "profiles": {
     "GZipTest": {
-      "commandName": "Project",
-      "commandLineArgs": "decompress  \"C:\\Users\\AntonSizikov\\Downloads\\google-site-reliability-engineering.pdf.compressed\"  \"C:\\Users\\AntonSizikov\\Downloads\\google-site-reliability-engineering.pdf\"    "
+      "commandName": "Project"
     }
   }
 }

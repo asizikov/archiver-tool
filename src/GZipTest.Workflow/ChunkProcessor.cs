@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using GZipTest.Compression;
+using GZipTest.Workflow.Context;
 
 namespace GZipTest.Workflow
 {
@@ -10,16 +11,20 @@ namespace GZipTest.Workflow
         private readonly BlockingCollection<JobBatchItem> jobQueue;
         private readonly IOutputBuffer outputBuffer;
         private readonly IByteProcessor byteProcessor;
+        private readonly IJobContext jobContext;
+        private readonly CancellationTokenSource cancellationTokenSource;
         private readonly CountdownEvent countdown;
         private Thread workThread;
         private CancellationToken cancellationToken;
 
-        public ChunkProcessor(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, IByteProcessor byteProcessor,
+        public ChunkProcessor(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, IByteProcessor byteProcessor, IJobContext jobContext, CancellationTokenSource cancellationTokenSource,
             CountdownEvent countdown)
         {
             this.jobQueue = jobQueue;
             this.outputBuffer = outputBuffer;
             this.byteProcessor = byteProcessor;
+            this.jobContext = jobContext;
+            this.cancellationTokenSource = cancellationTokenSource;
             this.countdown = countdown;
         }
 
@@ -53,7 +58,8 @@ namespace GZipTest.Workflow
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    jobContext.Failure(e, e.Message);
+                    cancellationTokenSource.Cancel();
                 }
                 if (!cancellationToken.IsCancellationRequested)
                 {
