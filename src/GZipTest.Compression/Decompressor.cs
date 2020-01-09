@@ -1,18 +1,36 @@
-﻿using System.IO;
+﻿using System.Buffers;
 using System.IO.Compression;
+using Microsoft.IO;
 
 namespace GZipTest.Compression
 {
     public sealed class Decompressor : IByteProcessor
     {
-        public byte[] Process(byte[] input)
+        private readonly RecyclableMemoryStreamManager recyclableMemoryStreamManager;
+
+        public Decompressor(RecyclableMemoryStreamManager recyclableMemoryStreamManager)
         {
-            using var compressedMemoryStream = new MemoryStream(input);
+            this.recyclableMemoryStreamManager = recyclableMemoryStreamManager;
+        }
+
+        public ProcessedChunk Process(byte[] input, int bufferSize)
+        {
+            using var compressedMemoryStream = recyclableMemoryStreamManager.GetStream();
+            compressedMemoryStream.Write(input, 0, bufferSize);
+            compressedMemoryStream.Position = 0;
+
             using var zipStream = new GZipStream(compressedMemoryStream, CompressionMode.Decompress);
-            using var resultStream = new MemoryStream();
+            using var resultStream = recyclableMemoryStreamManager.GetStream();
+            
             zipStream.CopyTo(resultStream);
-            zipStream.Close();
-            return resultStream.ToArray();
+            zipStream.Flush();
+            resultStream.Position = 0;
+            
+            var size = (int) resultStream.Length;
+            var bytes = ArrayPool<byte>.Shared.Rent(size);
+            
+            resultStream.Read(bytes, 0, size);
+            return new ProcessedChunk(bytes, size);
         }
     }
 }

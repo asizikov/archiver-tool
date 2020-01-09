@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Threading;
@@ -51,7 +52,8 @@ namespace GZipTest.Workflow
                     if (!cancellationToken.IsCancellationRequested)
                     {
                         jobContext.ProcessedId = processedBatchItem.JobBatchItemId;
-                        file.Write(processedBatchItem.Processed);
+                        file.Write(processedBatchItem.Processed.Buffer, processedBatchItem.Processed.Size);
+                        ArrayPool<byte>.Shared.Return(processedBatchItem.Processed.Buffer);
                     }
                     else
                     {

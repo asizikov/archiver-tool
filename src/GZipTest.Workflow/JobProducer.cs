@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using GZipTest.IO;
@@ -11,14 +12,14 @@ namespace GZipTest.Workflow
     {
         private readonly IFileReaderFactory fileReaderFactory;
         private readonly IJobContext jobContext;
-        private readonly BlockingCollection<JobBatchItem> queue;
+        private readonly BlockingCollection<FileChunk> queue;
         private readonly FileInfo fileInfo;
         private readonly CountdownEvent countdown;
 
         private long batchItemId = 0;
         private CancellationTokenSource cancellationTokenSource;
 
-        public JobProducer(IFileReaderFactory fileReaderFactory, IJobContext jobContext, BlockingCollection<JobBatchItem> queue, FileInfo fileInfo,
+        public JobProducer(IFileReaderFactory fileReaderFactory, IJobContext jobContext, BlockingCollection<FileChunk> queue, FileInfo fileInfo,
             CountdownEvent countdown)
         {
             this.fileReaderFactory = fileReaderFactory;
@@ -47,11 +48,9 @@ namespace GZipTest.Workflow
             {
                 foreach (var chunk in fileReader.Read(fileInfo))
                 {
-                    queue.Add(new JobBatchItem
-                    {
-                        Buffer = chunk,
-                        JobBatchItemId = batchItemId
-                    });
+                    var local = chunk;
+                    local.JobBatchItemId = batchItemId;
+                    queue.Add(local);
                     jobContext.SubmittedId = batchItemId;
                     Interlocked.Increment(ref batchItemId);
                 }

@@ -13,9 +13,9 @@ namespace GZipTest.IO
 
         public void Dispose() => stream.Dispose();
 
-        public void Write(byte[] buffer)
+        public void Write(byte[] buffer, int size)
         {
-            stream.Write(buffer, 0, buffer.Length);
+            stream.Write(buffer, 0, size);
         }
     }
 }

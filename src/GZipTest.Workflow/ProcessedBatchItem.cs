@@ -1,8 +1,10 @@
-﻿namespace GZipTest.Workflow
+﻿using GZipTest.Compression;
+
+namespace GZipTest.Workflow
 {
     public struct ProcessedBatchItem
     {
         public long JobBatchItemId { get; set; }
-        public byte[] Processed { get; set; }
+        public ProcessedChunk Processed { get; set; }
     }
 }

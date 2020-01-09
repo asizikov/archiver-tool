@@ -1,6 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System.Buffers;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
+using GZipTest.IO;
 using GZipTest.Workflow.Context;
 using GZipTest.Workflow.Factories;
 using GZipTest.Workflow.JobConfiguration;
@@ -45,7 +47,7 @@ namespace GZipTest.Workflow
             using (var countdown = new CountdownEvent(1))
             {
                 using var cancellationTokenSource = new CancellationTokenSource();
-                using var jobQueue = new BlockingCollection<JobBatchItem>(new ConcurrentQueue<JobBatchItem>(), chunkProcessorPool.Length * 10);
+                using var jobQueue = new BlockingCollection<FileChunk>(new ConcurrentQueue<FileChunk>(), chunkProcessorPool.Length * 10);
                 using var processedJobQueue = new BlockingCollection<ProcessedBatchItem>(new OrderedConcurrentDictionaryWrapper(), chunkProcessorPool.Length * 10);
 
                 var outputBuffer = outputBufferFactory.Create(processedJobQueue, chunkProcessorPool.Length);

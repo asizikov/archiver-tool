@@ -20,7 +20,7 @@ namespace GZipTest.Application
         }
 
         public JobProducer Create(FileInfo fileInfo,
-            BlockingCollection<JobBatchItem> jobQueue, CountdownEvent countdown)
+            BlockingCollection<FileChunk> jobQueue, CountdownEvent countdown)
         {
             return new JobProducer(fileReader, jobContext, jobQueue, fileInfo, countdown);
         }

@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Threading;
 using GZipTest.Compression;
+using GZipTest.IO;
 using GZipTest.Workflow.Context;
 
 namespace GZipTest.Workflow
 {
     public sealed class ChunkProcessor
     {
-        private readonly BlockingCollection<JobBatchItem> jobQueue;
+        private readonly BlockingCollection<FileChunk> jobQueue;
         private readonly IOutputBuffer outputBuffer;
         private readonly IByteProcessor byteProcessor;
         private readonly IJobContext jobContext;
@@ -17,7 +19,7 @@ namespace GZipTest.Workflow
         private Thread workThread;
         private CancellationToken cancellationToken;
 
-        public ChunkProcessor(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer,
+        public ChunkProcessor(BlockingCollection<FileChunk> jobQueue, IOutputBuffer outputBuffer,
             IByteProcessor byteProcessor, IJobContext jobContext, CancellationTokenSource cancellationTokenSource,
             CountdownEvent countdown)
         {
@@ -54,8 +56,10 @@ namespace GZipTest.Workflow
                     var processed = new ProcessedBatchItem
                     {
                         JobBatchItemId = jobBatchItem.JobBatchItemId,
-                        Processed = byteProcessor.Process(jobBatchItem.Buffer)
+                        Processed = byteProcessor.Process(jobBatchItem.Buffer, jobBatchItem.Size)
                     };
+                    ArrayPool<byte>.Shared.Return(jobBatchItem.Buffer);
+
                     if (!cancellationToken.IsCancellationRequested)
                     {
                         outputBuffer.SubmitProcessedBatchItem(processed);

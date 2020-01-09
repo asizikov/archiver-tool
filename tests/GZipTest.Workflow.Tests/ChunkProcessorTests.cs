@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using GZipTest.Compression;
+using GZipTest.IO;
 using GZipTest.Workflow.Context;
 using Moq;
 using Shouldly;
@@ -12,7 +13,7 @@ namespace GZipTest.Workflow.Tests
     public sealed class ChunkProcessorTests : IDisposable
     {
         private readonly ChunkProcessor chunkProcessor;
-        private readonly BlockingCollection<JobBatchItem> inputQueue;
+        private readonly BlockingCollection<FileChunk> inputQueue;
         private readonly Mock<IOutputBuffer> outputBufferMock;
         private readonly Mock<IByteProcessor> processor;
         private readonly Mock<IJobContext> jobContextMock;
@@ -23,7 +24,7 @@ namespace GZipTest.Workflow.Tests
         {
             cancellationTokenSource = new CancellationTokenSource();
             countdownEvent = new CountdownEvent(1);
-            inputQueue = new BlockingCollection<JobBatchItem>();
+            inputQueue = new BlockingCollection<FileChunk>();
             outputBufferMock = new Mock<IOutputBuffer>();
             processor = new Mock<IByteProcessor>();
             jobContextMock = new Mock<IJobContext>();
@@ -41,10 +42,10 @@ namespace GZipTest.Workflow.Tests
                 countdownEvent.AddCount();
                 var good = new byte[] { };
                 var faulty = new byte[] { };
-                processor.Setup(p => p.Process(good)).Returns(new byte[] { });
-                inputQueue.Add(new JobBatchItem {Buffer = good});
-                processor.Setup(p => p.Process(faulty)).Throws<Exception>();
-                inputQueue.Add(new JobBatchItem {Buffer = faulty});
+                processor.Setup(p => p.Process(good, 0)).Returns(new ProcessedChunk(new byte[] { }, 0));
+                inputQueue.Add(new FileChunk {Buffer = good});
+                processor.Setup(p => p.Process(faulty, 0)).Throws<Exception>();
+                inputQueue.Add(new FileChunk {Buffer = faulty});
                 inputQueue.CompleteAdding();
                 countdownEvent.Signal();
             });
@@ -60,10 +61,10 @@ namespace GZipTest.Workflow.Tests
         [Fact]
         public void AbortsWhenCancellationRequested()
         {
-            var good = new byte[] { };
-            var result = new byte[] { };
-            processor.Setup(p => p.Process(good)).Returns(result);
-            inputQueue.Add(new JobBatchItem {Buffer = good});
+            var good = new ProcessedChunk(new byte[] { }, 0);
+            var result = new ProcessedChunk(new byte[] { }, 0);
+            processor.Setup(p => p.Process(good.Buffer,good.Size)).Returns(result);
+            inputQueue.Add(new FileChunk( good.Buffer, good.Size));
             cancellationTokenSource.Cancel();
 
             chunkProcessor.Start(cancellationTokenSource.Token);
