@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using GZipTest.Compression;
 using GZipTest.IO;
+using Microsoft.IO;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -14,10 +15,15 @@ namespace GZipTest.Workflow.IntegrationTests
     public sealed class FileReadersIntegrationTests : IntegrationTestBase
     {
         private readonly ITestOutputHelper outputHelper;
+        private readonly Compressor compressor;
+        private readonly Decompressor decompressor;
 
         public FileReadersIntegrationTests(ITestOutputHelper outputHelper)
         {
             this.outputHelper = outputHelper;
+            var streamManager = new RecyclableMemoryStreamManager();
+            compressor = new Compressor(streamManager);
+            decompressor = new Decompressor(streamManager);
         }
 
         [Fact]
@@ -33,35 +39,33 @@ namespace GZipTest.Workflow.IntegrationTests
             }
 
             var compressedBufferedFileReader = new CompressedBufferedFileReader();
-            var chunks = new List<byte[]>();
+            var chunks = new List<(byte[] buffer, int size)>();
             foreach (var chunk in compressedBufferedFileReader.Read(outputFile))
             {
-                chunks.Add(chunk);
+                chunks.Add((chunk.buffer, chunk.size));
             }
 
-            buffer.SequenceEqual(chunks[0]).ShouldBeTrue();
-            bufferTwo.SequenceEqual(chunks[1]).ShouldBeTrue();
+            buffer.SequenceEqual(chunks[0].buffer.Take(chunks[0].size)).ShouldBeTrue();
+            bufferTwo.SequenceEqual(chunks[1].buffer.Take(chunks[1].size)).ShouldBeTrue();
         }
 
         [Fact]
         public void CompressedChunksAreStoredRetrievedAndDecompressedCorrectly()
         {
-            var compressor = new Compressor();
             var buffer = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
             var bufferTwo = Encoding.ASCII.GetBytes("FileReadersIntegrationTests part two");
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
                 using var compressedFileStreamWrapper = new CompressedFileStreamWrapper(fileStream);
-                compressedFileStreamWrapper.Write(compressor.Process(buffer));
-                compressedFileStreamWrapper.Write(compressor.Process(bufferTwo));
+                compressedFileStreamWrapper.Write(compressor.Process(buffer, buffer.Length));
+                compressedFileStreamWrapper.Write(compressor.Process(bufferTwo, bufferTwo.Length));
             }
 
-            var decompressor = new Decompressor();
             var compressedBufferedFileReader = new CompressedBufferedFileReader();
             var chunks = new List<byte[]>();
             foreach (var chunk in compressedBufferedFileReader.Read(outputFile))
             {
-                chunks.Add(decompressor.Process(chunk));
+                chunks.Add(decompressor.Process(chunk.buffer, chunk.size));
             }
 
             buffer.SequenceEqual(chunks[0]).ShouldBeTrue();
@@ -77,20 +81,18 @@ namespace GZipTest.Workflow.IntegrationTests
             Array.Copy(buffer, 0, combinedBuffers, 0, buffer.Length);
             Array.Copy(bufferTwo, 0, combinedBuffers, buffer.Length, bufferTwo.Length);
 
-            var compressor = new Compressor();
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
                 using var compressedFileStreamWrapper = new CompressedFileStreamWrapper(fileStream);
-                compressedFileStreamWrapper.Write(compressor.Process(buffer));
-                compressedFileStreamWrapper.Write(compressor.Process(bufferTwo));
+                compressedFileStreamWrapper.Write(compressor.Process(buffer, buffer.Length));
+                compressedFileStreamWrapper.Write(compressor.Process(bufferTwo, bufferTwo.Length));
             }
 
-            var decompressor = new Decompressor();
             var compressedBufferedFileReader = new CompressedBufferedFileReader();
             var chunks = new List<byte[]>();
             foreach (var chunk in compressedBufferedFileReader.Read(outputFile))
             {
-                chunks.Add(decompressor.Process(chunk));
+                chunks.Add(decompressor.Process(chunk.buffer, chunk.size));
             }
 
             buffer.SequenceEqual(chunks[0]).ShouldBeTrue();
@@ -121,42 +123,40 @@ namespace GZipTest.Workflow.IntegrationTests
             });
 
             var uncompressedBufferedFileReader = new UncompressedBufferedFileReader();
-            var buffers = new List<byte[]>();
+            var buffers = new List<(byte[] buffer, int size)>();
             foreach (var buffer in uncompressedBufferedFileReader.Read(inputFile))
             {
                 buffers.Add(buffer);
             }
 
-            var combinedBuffer = new byte[buffers.Sum(b => b.Length)];
+            var combinedBuffer = new byte[buffers.Sum(b => b.size)];
             var copied = 0;
             for (int i = 0; i < buffers.Count; i++)
             {
-                Array.Copy(buffers[i],0,combinedBuffer, copied, buffers[i].Length);
-                copied += buffers[i].Length;
+                Array.Copy(buffers[i].buffer,0,combinedBuffer, copied, buffers[i].size);
+                copied += buffers[i].size;
             }
             outputHelper.WriteLine(Encoding.ASCII.GetString(combinedBuffer));
             outputHelper.WriteLine("buffers " + buffers.Count);
-            var compressor = new Compressor();
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
                 using var compressedFileStreamWrapper = new CompressedFileStreamWrapper(fileStream);
                 foreach (var buffer in buffers)
                 {
-                    compressedFileStreamWrapper.Write(compressor.Process(buffer));
+                    compressedFileStreamWrapper.Write(compressor.Process(buffer.buffer, buffer.size));
                 }
             }
 
-            var decompressor = new Decompressor();
             var compressedBufferedFileReader = new CompressedBufferedFileReader();
             var chunks = new List<byte[]>();
             foreach (var chunk in compressedBufferedFileReader.Read(outputFile))
             {
-                chunks.Add(decompressor.Process(chunk));
+                chunks.Add(decompressor.Process(chunk.buffer, chunk.size));
             }
 
             for (int i = 0; i < buffers.Count; i++)
             {
-                buffers[i].SequenceEqual(chunks[i]).ShouldBeTrue();
+                buffers[i].buffer.Take(buffers[i].size).SequenceEqual(chunks[i]).ShouldBeTrue();
             }
 
             using (var decompressedFileStream = File.Open(decompressedFile.FullName, FileMode.Create))

@@ -49,7 +49,8 @@ namespace GZipTest.Workflow
                 {
                     queue.Add(new JobBatchItem
                     {
-                        Buffer = chunk,
+                        Buffer = chunk.buffer,
+                        bufferSize = chunk.size,
                         JobBatchItemId = batchItemId
                     });
                     jobContext.SubmittedId = batchItemId;

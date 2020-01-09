@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Threading;
 using GZipTest.Compression;
@@ -54,8 +55,10 @@ namespace GZipTest.Workflow
                     var processed = new ProcessedBatchItem
                     {
                         JobBatchItemId = jobBatchItem.JobBatchItemId,
-                        Processed = byteProcessor.Process(jobBatchItem.Buffer)
+                        Processed = byteProcessor.Process(jobBatchItem.Buffer, jobBatchItem.bufferSize)
                     };
+                    ArrayPool<byte>.Shared.Return(jobBatchItem.Buffer);
+
                     if (!cancellationToken.IsCancellationRequested)
                     {
                         outputBuffer.SubmitProcessedBatchItem(processed);

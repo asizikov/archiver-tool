@@ -41,9 +41,9 @@ namespace GZipTest.Workflow.Tests
                 countdownEvent.AddCount();
                 var good = new byte[] { };
                 var faulty = new byte[] { };
-                processor.Setup(p => p.Process(good)).Returns(new byte[] { });
+                processor.Setup(p => p.Process(good, 0)).Returns(new byte[] { });
                 inputQueue.Add(new JobBatchItem {Buffer = good});
-                processor.Setup(p => p.Process(faulty)).Throws<Exception>();
+                processor.Setup(p => p.Process(faulty, 0)).Throws<Exception>();
                 inputQueue.Add(new JobBatchItem {Buffer = faulty});
                 inputQueue.CompleteAdding();
                 countdownEvent.Signal();
@@ -62,7 +62,7 @@ namespace GZipTest.Workflow.Tests
         {
             var good = new byte[] { };
             var result = new byte[] { };
-            processor.Setup(p => p.Process(good)).Returns(result);
+            processor.Setup(p => p.Process(good,0)).Returns(result);
             inputQueue.Add(new JobBatchItem {Buffer = good});
             cancellationTokenSource.Cancel();
 

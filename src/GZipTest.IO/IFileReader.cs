@@ -5,6 +5,7 @@ namespace GZipTest.IO
 {
     public interface IFileReader
     {
-        IEnumerable<byte[]> Read(FileInfo path);
+        IEnumerable<(byte[] buffer, int size)> Read(FileInfo path);
     }
+
 }
