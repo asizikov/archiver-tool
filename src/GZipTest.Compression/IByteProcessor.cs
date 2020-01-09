@@ -2,6 +2,6 @@
 {
     public interface IByteProcessor
     {
-        byte[] Process(byte[] input, int bufferSize);
+        ProcessedChunk Process(byte[] input, int bufferSize);
     }
 }

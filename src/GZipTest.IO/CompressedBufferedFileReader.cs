@@ -6,7 +6,7 @@ namespace GZipTest.IO
 {
     public class CompressedBufferedFileReader : IFileReader
     {
-        public IEnumerable<(byte[] buffer, int size)> Read(FileInfo path)
+        public IEnumerable<FileChunk> Read(FileInfo path)
         {
             using var fileStream = path.OpenRead();
             using var binaryReader = new BinaryReader(fileStream);
@@ -18,7 +18,7 @@ namespace GZipTest.IO
             {
                 if (bufferSize == size)
                 {
-                    yield return (buffer, size);
+                    yield return new FileChunk(buffer, size);
                 }
                 else
                 {

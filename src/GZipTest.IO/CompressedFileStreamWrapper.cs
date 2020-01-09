@@ -18,10 +18,10 @@ namespace GZipTest.IO
             writer.Dispose();
         }
 
-        public void Write(byte[] buffer)
+        public void Write(byte[] buffer, int size)
         {
-            writer.Write(buffer.Length);
-            writer.Write(buffer, 0, buffer.Length);
+            writer.Write(size);
+            writer.Write(buffer, 0, size);
         }
     }
 }

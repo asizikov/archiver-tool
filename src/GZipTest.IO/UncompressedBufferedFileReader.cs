@@ -1,5 +1,4 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 
@@ -9,7 +8,7 @@ namespace GZipTest.IO
     {
         private const int SIZE = 1024 * 1024;
 
-        public IEnumerable<(byte[] buffer, int size)> Read(FileInfo path)
+        public IEnumerable<FileChunk> Read(FileInfo path)
         {
             using var fileStream = path.OpenRead();
             using var binaryReader = new BinaryReader(fileStream);
@@ -18,7 +17,7 @@ namespace GZipTest.IO
             {
                 var buffer = ArrayPool<byte>.Shared.Rent(SIZE);
                 var bufferSize = binaryReader.Read(buffer, 0, SIZE);
-                yield return (buffer, bufferSize);
+                yield return new FileChunk(buffer, bufferSize);
             } while (binaryReader.BaseStream.Length > binaryReader.BaseStream.Position);
         }
     }

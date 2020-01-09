@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Threading;
 using GZipTest.Compression;
+using GZipTest.IO;
 using GZipTest.Workflow;
 using GZipTest.Workflow.Context;
 using GZipTest.Workflow.Factories;
@@ -20,7 +21,7 @@ namespace GZipTest.Application
             this.jobContext = jobContext;
         }
 
-        public ChunkProcessor Create(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
+        public ChunkProcessor Create(BlockingCollection<FileChunk> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
         {
             var processor = jobContext.Operation == Operation.Compress ? new Compressor(recyclableMemoryStreamManager) as IByteProcessor : new Decompressor(recyclableMemoryStreamManager);
             return new ChunkProcessor(jobQueue, outputBuffer, processor, jobContext, cancellationTokenSource, countdown);

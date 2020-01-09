@@ -27,8 +27,8 @@ namespace GZipTest.Compression.Tests
             var buffer = Encoding.ASCII.GetBytes(content);
 
             var compressed = compressor.Process(buffer, buffer.Length);
-            var decompressed = decompressor.Process(compressed, compressed.Length);
-            Encoding.ASCII.GetString(decompressed).ShouldBe(content);
+            var decompressed = decompressor.Process(compressed.Buffer, compressed.Size);
+            Encoding.ASCII.GetString(decompressed.Buffer,0,decompressed.Size).ShouldBe(content);
         }
 
         [Fact]
@@ -44,12 +44,12 @@ namespace GZipTest.Compression.Tests
             var firstCompressed = compressor.Process(first, first.Length);
             var secondCompressed = compressor.Process(second, second.Length);
 
-            var firstDecompressed = decompressor.Process(firstCompressed, firstCompressed.Length);
-            var secondDecompressed = decompressor.Process(secondCompressed, secondCompressed.Length);
+            var firstDecompressed = decompressor.Process(firstCompressed.Buffer, firstCompressed.Size);
+            var secondDecompressed = decompressor.Process(secondCompressed.Buffer, secondCompressed.Size);
 
-            var result = new byte[firstDecompressed.Length + secondDecompressed.Length];
-            Array.Copy(firstDecompressed, 0, result, 0, firstDecompressed.Length);
-            Array.Copy(secondDecompressed, 0, result, firstDecompressed.Length, secondDecompressed.Length);
+            var result = new byte[firstDecompressed.Size + secondDecompressed.Size];
+            Array.Copy(firstDecompressed.Buffer, 0, result, 0, firstDecompressed.Size);
+            Array.Copy(secondDecompressed.Buffer, 0, result, firstDecompressed.Size, secondDecompressed.Size);
             Encoding.ASCII.GetString(result).ShouldBe(content);
         }
     }
