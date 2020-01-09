@@ -18,7 +18,7 @@ dotnet test
 on Unix/MacOS:
 
 ```
-dotnet run GZipTest [compress|decompress] "/path/to/source.file" "/path/to/processed/file"
+dotnet GZipTest.dll [compress|decompress] /path/to/source.file /path/to/processed/file
 ```
 
 on Windows:
