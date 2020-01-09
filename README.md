@@ -1,10 +1,13 @@
-#archiver-tool
+# archiver-tool
 
 
-![](https://github.com/asizikov/archiver-tool/workflows/.github/workflows/dotnetcore.yml/badge.svg)
+![](https://github.com/asizikov/archiver-tool/workflows/.github/workflows/build-application/badge.svg)
 
 ## How to build
 
+make sure you have `.NET Core 3` SDK installed.
+
+navigate to the solution folder and execute
 ```
 dotnet build --configuration Release
 ```
@@ -12,5 +15,5 @@ dotnet build --configuration Release
 ## How to run
 
 ```
-GZipTest compress "/path/to/source.file" "/path/to/compressed/file"
+dotnet run GZipTest compress "/path/to/source.file" "/path/to/compressed/file"
 ```
