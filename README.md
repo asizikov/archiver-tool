@@ -1,7 +1,7 @@
 # archiver-tool
 
 
-![](https://github.com/asizikov/archiver-tool/workflows/.github/workflows/build-application/badge.svg)
+![](https://github.com/asizikov/archiver-tool/workflows/build-application/badge.svg)
 
 ## How to build
 
