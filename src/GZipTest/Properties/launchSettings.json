@@ -1,3 +1,8 @@
 {
-  
+  "profiles": {
+    "MacOS GZipTest Compress": {
+      "commandName": "Project",
+      "commandLineArgs": "compress /Users/anton/Downloads/JetBrains.Rider-2019.3.1.dmg /Users/anton/Downloads/compressed.bin"
+    }
+  }
 }
