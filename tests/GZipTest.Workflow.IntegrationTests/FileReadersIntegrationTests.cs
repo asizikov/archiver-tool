@@ -168,16 +168,9 @@ namespace GZipTest.Workflow.IntegrationTests
                 }
             }
 
-            //File.ReadAllBytes(inputFile.FullName)
-            //    .SequenceEqual(File.ReadAllBytes(decompressedFile.FullName))
-            //    .ShouldBeTrue();
-            var input = File.ReadAllBytes(inputFile.FullName);
-            var output = File.ReadAllBytes(decompressedFile.FullName);
-
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (input[i] != output[i]) outputHelper.WriteLine($"different at{i}: expected:{input[i]} but was {output[i]}");
-            }
+            File.ReadAllBytes(inputFile.FullName)
+                .SequenceEqual(File.ReadAllBytes(decompressedFile.FullName))
+                .ShouldBeTrue();
         }
     }
 }
