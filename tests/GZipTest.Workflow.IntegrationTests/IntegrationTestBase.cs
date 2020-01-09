@@ -21,6 +21,7 @@ namespace GZipTest.Workflow.IntegrationTests
             var embeddedFileProvider = new EmbeddedFileProvider(typeof(WorkflowIntegrationTests).Assembly);
             var embeddedFile = embeddedFileProvider.GetFileInfo("test_file.bin");
             var tempPath = Path.Join(Path.GetTempPath(), subdirectory);
+
             if (!Directory.Exists(tempPath))
             {
                 Directory.CreateDirectory(tempPath);

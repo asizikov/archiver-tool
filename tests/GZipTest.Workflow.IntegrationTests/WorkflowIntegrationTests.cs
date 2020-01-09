@@ -12,16 +12,19 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace GZipTest.Workflow.IntegrationTests
 {
     public sealed class WorkflowIntegrationTests : IntegrationTestBase
     {
+        private readonly ITestOutputHelper outputHelper;
         private readonly IServiceProvider serviceProvider;
         private readonly IJobBatchOrchestrator jobBatchOrchestrator;
 
-        public WorkflowIntegrationTests()
+        public WorkflowIntegrationTests(ITestOutputHelper output)
         {
+            this.outputHelper = output;
             var serviceCollection = new ServiceCollection()
                 .AddWorkflowServices()
                 .AddIOServices()
@@ -60,6 +63,9 @@ namespace GZipTest.Workflow.IntegrationTests
             thread.Join();
 
             jobContext.Result.ShouldBe(ExecutionResult.Success);
+            outputFile.Refresh();
+            decompressedFile.Refresh();
+
             outputFile.Length.ShouldNotBeNull();
             inputFile.Length.ShouldBe(decompressedFile.Length);
 

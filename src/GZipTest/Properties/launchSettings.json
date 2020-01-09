@@ -2,7 +2,7 @@
   "profiles": {
     "GZipTest": {
       "commandName": "Project",
-      "commandLineArgs": "decompress  \"\\\\Mac\\Home\\Downloads\\sql-toolbelt-compressed.gz\"  \"\\\\Mac\\Home\\Downloads\\Designing Data-Intensive Applications2.pdf\" "
+      "commandLineArgs": "decompress  \"C:\\Users\\AntonSizikov\\Downloads\\google-site-reliability-engineering.pdf.compressed\"  \"C:\\Users\\AntonSizikov\\Downloads\\google-site-reliability-engineering.pdf\"    "
     }
   }
 }

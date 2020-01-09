@@ -6,15 +6,17 @@ namespace GZipTest.IO
 {
     public class UncompressedBufferedFileReader :IFileReader
     {
-        private const long SIZE = 1024 * 128;
-        
+        private const long SIZE = 1000 * 1024;
+
         public IEnumerable<byte[]> Read(FileInfo path)
         {
             using var fileStream = path.OpenRead();
-            var buffer = new byte[SIZE];
-            var bufferSize = fileStream.Read(buffer, 0 , buffer.Length);
-            while (bufferSize > 0)
+            using var binaryReader = new BinaryReader(fileStream);
+
+            do
             {
+                var buffer = new byte[SIZE];
+                var bufferSize = binaryReader.Read(buffer, 0, buffer.Length);
                 if (bufferSize == SIZE)
                 {
                     yield return buffer;
@@ -25,8 +27,8 @@ namespace GZipTest.IO
                     Array.ConstrainedCopy(buffer, 0, last, 0, bufferSize);
                     yield return last;
                 }
-                bufferSize = fileStream.Read(buffer, 0, buffer.Length);
-            }
+
+            } while (binaryReader.BaseStream.Length > binaryReader.BaseStream.Position);
         }
     }
 }

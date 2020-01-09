@@ -12,7 +12,7 @@ namespace GZipTest.IO
 
             var size = binaryReader.ReadInt32();
             var buffer = new byte[size];
-            var bufferSize = fileStream.Read(buffer, 0, buffer.Length);
+            var bufferSize = binaryReader.Read(buffer, 0, buffer.Length);
             while (bufferSize > 0)
             {
                 if (bufferSize == size)
@@ -31,7 +31,7 @@ namespace GZipTest.IO
 
                 size = binaryReader.ReadInt32();
                 buffer = new byte[size];
-                bufferSize = fileStream.Read(buffer, 0, buffer.Length);
+                bufferSize = binaryReader.Read(buffer, 0, buffer.Length);
             }
         }
     }

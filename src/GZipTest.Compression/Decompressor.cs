@@ -11,6 +11,7 @@ namespace GZipTest.Compression
             using var zipStream = new GZipStream(compressedMemoryStream, CompressionMode.Decompress);
             using var resultStream = new MemoryStream();
             zipStream.CopyTo(resultStream);
+            zipStream.Close();
             return resultStream.ToArray();
         }
     }

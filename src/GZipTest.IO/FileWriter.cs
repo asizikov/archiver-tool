@@ -6,6 +6,10 @@ namespace GZipTest.IO
     {
         public IFile OpenFile(FileInfo path, bool  compressed)
         {
+            if (path.Exists)
+            {
+                path.Delete();
+            }
             var fileStream = File.Create(path.FullName);
             if (compressed)
             {
