@@ -6,7 +6,7 @@ using GZipTest.Workflow.Context;
 
 namespace GZipTest.Workflow
 {
-    public class ChunkProcessor
+    public sealed class ChunkProcessor
     {
         private readonly BlockingCollection<JobBatchItem> jobQueue;
         private readonly IOutputBuffer outputBuffer;
@@ -17,7 +17,8 @@ namespace GZipTest.Workflow
         private Thread workThread;
         private CancellationToken cancellationToken;
 
-        public ChunkProcessor(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer, IByteProcessor byteProcessor, IJobContext jobContext, CancellationTokenSource cancellationTokenSource,
+        public ChunkProcessor(BlockingCollection<JobBatchItem> jobQueue, IOutputBuffer outputBuffer,
+            IByteProcessor byteProcessor, IJobContext jobContext, CancellationTokenSource cancellationTokenSource,
             CountdownEvent countdown)
         {
             this.jobQueue = jobQueue;
@@ -41,34 +42,37 @@ namespace GZipTest.Workflow
 
         private void ProcessChunk()
         {
-            foreach (var jobBatchItem in jobQueue.GetConsumingEnumerable())
+            try
             {
-                if (cancellationToken.IsCancellationRequested)
+                foreach (var jobBatchItem in jobQueue.GetConsumingEnumerable())
                 {
-                    break;
-                }
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
 
-                var processed = new ProcessedBatchItem
-                {
-                    JobBatchItemId = jobBatchItem.JobBatchItemId
-                };
-                try
-                {
-                    processed.Processed = byteProcessor.Process(jobBatchItem.Buffer);
+                    var processed = new ProcessedBatchItem
+                    {
+                        JobBatchItemId = jobBatchItem.JobBatchItemId,
+                        Processed = byteProcessor.Process(jobBatchItem.Buffer)
+                    };
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        outputBuffer.SubmitProcessedBatchItem(processed);
+                    }
                 }
-                catch (Exception e)
-                {
-                    jobContext.Failure(e, e.Message);
-                    cancellationTokenSource.Cancel();
-                }
-                if (!cancellationToken.IsCancellationRequested)
-                {
-                    outputBuffer.SubmitProcessedBatchItem(processed);
-                }
+            }
+            catch (Exception e)
+            {
+                jobContext.Failure(e, e.Message);
+                cancellationTokenSource.Cancel();
+            }
+            finally
+            {
+                countdown.Signal();
             }
 
             outputBuffer.SubmitCompleted();
-            countdown.Signal();
         }
     }
 }
