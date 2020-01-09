@@ -8,7 +8,7 @@ using GZipTest.Workflow.Factories;
 
 namespace GZipTest.Application
 {
-    public class JobProducerFactory : IJobProducerFactory
+    public sealed class JobProducerFactory : IJobProducerFactory
     {
         private readonly IFileReaderFactory fileReader;
         private readonly IJobContext jobContext;
@@ -18,6 +18,7 @@ namespace GZipTest.Application
             this.fileReader = fileReader;
             this.jobContext = jobContext;
         }
+
         public JobProducer Create(FileInfo fileInfo,
             BlockingCollection<JobBatchItem> jobQueue, CountdownEvent countdown)
         {

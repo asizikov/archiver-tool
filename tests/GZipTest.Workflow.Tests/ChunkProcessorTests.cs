@@ -9,7 +9,7 @@ using Xunit;
 
 namespace GZipTest.Workflow.Tests
 {
-    public class ChunkProcessorTests : IDisposable
+    public sealed class ChunkProcessorTests : IDisposable
     {
         private readonly ChunkProcessor chunkProcessor;
         private readonly BlockingCollection<JobBatchItem> inputQueue;
@@ -65,7 +65,7 @@ namespace GZipTest.Workflow.Tests
             processor.Setup(p => p.Process(good)).Returns(result);
             inputQueue.Add(new JobBatchItem {Buffer = good});
             cancellationTokenSource.Cancel();
-            
+
             chunkProcessor.Start(cancellationTokenSource.Token);
 
             countdownEvent.Signal();

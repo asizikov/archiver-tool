@@ -2,7 +2,7 @@
 
 namespace GZipTest.Workflow
 {
-    public class OutputBuffer : IOutputBuffer
+    public sealed class OutputBuffer : IOutputBuffer
     {
         private readonly object syncRoot = new object();
         private int producers;
@@ -16,7 +16,7 @@ namespace GZipTest.Workflow
         }
 
 
-        public void SubmitProcessedBatchItem(ProcessedBatchItem processedBatchItem) 
+        public void SubmitProcessedBatchItem(ProcessedBatchItem processedBatchItem)
             => processedJobQueue.Add(processedBatchItem);
 
         public void SubmitCompleted()

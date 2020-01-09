@@ -8,12 +8,12 @@ using GZipTest.Workflow.JobConfiguration;
 
 namespace GZipTest.Workflow
 {
-    public class ProcessedJobsConsumer
+    public sealed class ProcessedJobsConsumer
     {
         private readonly BlockingCollection<ProcessedBatchItem> processedJobQueue;
         private readonly CountdownEvent countdown;
         private readonly CancellationTokenSource cancellationTokenSource;
-       
+
         private readonly IJobContext jobContext;
         private readonly IFileWriter fileWriter;
         private CancellationToken cancellationToken;

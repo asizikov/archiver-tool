@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace GZipTest.Workflow
 {
-    public class JobBatchOrchestrator : IJobBatchOrchestrator
+    public sealed class JobBatchOrchestrator : IJobBatchOrchestrator
     {
         private readonly IJobProducerFactory jobProducerFactory;
         private readonly ILogger<JobBatchOrchestrator> logger;

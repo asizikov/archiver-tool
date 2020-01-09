@@ -7,7 +7,7 @@ using GZipTest.Workflow.JobConfiguration;
 
 namespace GZipTest.Workflow
 {
-    public class JobProducer
+    public sealed class JobProducer
     {
         private readonly IFileReaderFactory fileReaderFactory;
         private readonly IJobContext jobContext;

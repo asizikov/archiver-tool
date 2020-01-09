@@ -6,14 +6,14 @@ using System.Threading;
 
 namespace GZipTest.Workflow
 {
-    public class OrderedConcurrentDictionaryWrapper : IProducerConsumerCollection<ProcessedBatchItem>
+    public sealed class OrderedConcurrentDictionaryWrapper : IProducerConsumerCollection<ProcessedBatchItem>
     {
         private readonly object syncObject = new object();
-        
+
         private readonly ConcurrentDictionary<long, ProcessedBatchItem> processedJobs = new ConcurrentDictionary<long, ProcessedBatchItem>();
         private long lastTakenJobId = -1;
 
-        public IEnumerator<ProcessedBatchItem> GetEnumerator() 
+        public IEnumerator<ProcessedBatchItem> GetEnumerator()
             => processedJobs.Values.GetEnumerator();
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
