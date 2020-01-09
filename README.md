@@ -10,6 +10,7 @@ make sure you have `.NET Core 3` SDK installed.
 navigate to the solution folder and execute
 ```
 dotnet build --configuration Release
+dotnet test
 ```
 
 ## How to run
