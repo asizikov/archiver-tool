@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using GZipTest.Application;
 using GZipTest.IO.DependencyInjection;
 using GZipTest.Workflow;
@@ -15,9 +14,8 @@ namespace GZipTest
         public static int Main(string[] args)
         {
             var services = ConfigureServices();
-            var serviceProvider = services.BuildServiceProvider();
+            using var serviceProvider = services.BuildServiceProvider();
             serviceProvider.GetService<IApplicationFlow>().Run(args);
-            Console.ReadLine();
             return (int)ExecutionResult.Success;
         }
 
@@ -33,7 +31,6 @@ namespace GZipTest
                 logging.AddConfiguration(config.GetSection("Logging"));
                 logging.AddConsole();
             }).Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
-
 
             serviceCollection.AddSingleton(config);
             serviceCollection.AddTransient<IApplicationFlow, ApplicationFlow>();
