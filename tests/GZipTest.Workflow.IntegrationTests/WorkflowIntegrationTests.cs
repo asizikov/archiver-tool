@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -7,30 +8,38 @@ using GZipTest.IO.DependencyInjection;
 using GZipTest.Workflow.Context;
 using GZipTest.Workflow.DependencyInjection;
 using GZipTest.Workflow.JobConfiguration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace GZipTest.Workflow.IntegrationTests
 {
     public sealed class WorkflowIntegrationTests : IntegrationTestBase
     {
-        private readonly ITestOutputHelper outputHelper;
         private readonly IServiceProvider serviceProvider;
         private readonly IJobBatchOrchestrator jobBatchOrchestrator;
 
-        public WorkflowIntegrationTests(ITestOutputHelper output)
+        public WorkflowIntegrationTests()
         {
-            this.outputHelper = output;
+            var builder = new ConfigurationBuilder();
+            builder.AddInMemoryCollection(new Dictionary<string, string>
+            {
+                {"Batching:ParallelWorkers", "100"},
+                {"Batching:QueueMultiplier", "10"},
+            });
+
+            var config = builder.Build();
             var serviceCollection = new ServiceCollection()
                 .AddWorkflowServices()
                 .AddIOServices()
                 .AddApplicationServices()
+                .AddOptions()
                 .AddLogging(logging => logging.AddProvider(NullLoggerProvider.Instance));
 
+            serviceCollection.Configure<Batching>(config.GetSection("Batching"));
             serviceProvider = serviceCollection.BuildServiceProvider();
             jobBatchOrchestrator = serviceProvider.GetService<IJobBatchOrchestrator>();
         }

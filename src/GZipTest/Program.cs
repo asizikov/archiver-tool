@@ -3,6 +3,7 @@ using GZipTest.Application;
 using GZipTest.IO.DependencyInjection;
 using GZipTest.Workflow;
 using GZipTest.Workflow.DependencyInjection;
+using GZipTest.Workflow.JobConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -26,11 +27,15 @@ namespace GZipTest
                 .AddWorkflowServices()
                 .AddIOServices()
                 .AddApplicationServices()
+                .AddOptions()
                 .AddLogging(logging =>
             {
                 logging.AddConfiguration(config.GetSection("Logging"));
                 logging.AddConsole();
-            }).Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
+            })
+                .Configure<Batching>(config.GetSection("Batching"))
+                .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
+
 
             serviceCollection.AddSingleton(config);
             serviceCollection.AddTransient<IApplicationFlow, ApplicationFlow>();

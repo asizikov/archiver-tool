@@ -10,14 +10,12 @@ namespace GZipTest.Application
     public class ApplicationFlow : IApplicationFlow
     {
         private readonly ILogger<ApplicationFlow> logger;
-        private readonly IConfiguration configuration;
         private readonly IJobBatchOrchestrator jobBatchOrchestrator;
         private readonly ICommandLineValidator commandLineValidator;
         private readonly IArgumentsParser argumentsParser;
         private readonly IJobContext jobContext;
 
-        public ApplicationFlow(IConfiguration configuration,
-            ILogger<ApplicationFlow> logger,
+        public ApplicationFlow(ILogger<ApplicationFlow> logger,
             IJobBatchOrchestrator jobBatchOrchestrator,
             ICommandLineValidator commandLineValidator,
             IArgumentsParser argumentsParser,
@@ -26,7 +24,6 @@ namespace GZipTest.Application
             this.commandLineValidator = commandLineValidator;
             this.argumentsParser = argumentsParser;
             this.jobContext = jobContext;
-            this.configuration = configuration;
             this.logger = logger;
             this.jobBatchOrchestrator = jobBatchOrchestrator;
         }
