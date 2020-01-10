@@ -7,6 +7,7 @@ using GZipTest.Application;
 using GZipTest.IO.DependencyInjection;
 using GZipTest.Workflow.Context;
 using GZipTest.Workflow.DependencyInjection;
+using GZipTest.Workflow.IntegrationTests.Utils;
 using GZipTest.Workflow.JobConfiguration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -78,9 +79,7 @@ namespace GZipTest.Workflow.IntegrationTests
             outputFile.Length.ShouldNotBeNull();
             inputFile.Length.ShouldBe(decompressedFile.Length);
 
-            File.ReadAllBytes(inputFile.FullName)
-                .SequenceEqual(File.ReadAllBytes(decompressedFile.FullName))
-                .ShouldBeTrue();
+            inputFile.ShouldHaveSameContentAs(decompressedFile);
         }
     }
 }

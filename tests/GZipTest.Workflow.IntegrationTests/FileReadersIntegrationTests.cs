@@ -5,22 +5,20 @@ using System.Linq;
 using System.Text;
 using GZipTest.Compression;
 using GZipTest.IO;
+using GZipTest.Workflow.IntegrationTests.Utils;
 using Microsoft.IO;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace GZipTest.Workflow.IntegrationTests
 {
     public sealed class FileReadersIntegrationTests : IntegrationTestBase
     {
-        private readonly ITestOutputHelper outputHelper;
         private readonly Compressor compressor;
         private readonly Decompressor decompressor;
 
-        public FileReadersIntegrationTests(ITestOutputHelper outputHelper)
+        public FileReadersIntegrationTests()
         {
-            this.outputHelper = outputHelper;
             var streamManager = new RecyclableMemoryStreamManager();
             compressor = new Compressor(streamManager);
             decompressor = new Decompressor(streamManager);
@@ -29,12 +27,13 @@ namespace GZipTest.Workflow.IntegrationTests
         [Fact]
         public void UncompressedChunksAreStoredAndRetrievedCorrectly()
         {
-            var buffer = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
+            var bufferOne = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
             var bufferTwo = Encoding.ASCII.GetBytes("FileReadersIntegrationTests part two");
+
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
                 using var compressedFileStreamWrapper = new CompressedFileStreamWrapper(fileStream);
-                compressedFileStreamWrapper.Write(buffer, buffer.Length);
+                compressedFileStreamWrapper.Write(bufferOne, bufferOne.Length);
                 compressedFileStreamWrapper.Write(bufferTwo, bufferTwo.Length);
             }
 
@@ -45,19 +44,20 @@ namespace GZipTest.Workflow.IntegrationTests
                 chunks.Add(chunk);
             }
 
-            buffer.SequenceEqual(chunks[0].Buffer.Take(chunks[0].Size)).ShouldBeTrue();
-            bufferTwo.SequenceEqual(chunks[1].Buffer.Take(chunks[1].Size)).ShouldBeTrue();
+            bufferOne.SequenceShouldBeEqualTo(chunks[0]);
+            bufferTwo.SequenceShouldBeEqualTo(chunks[1]);
         }
 
         [Fact]
         public void CompressedChunksAreStoredRetrievedAndDecompressedCorrectly()
         {
-            var buffer = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
+            var bufferOne = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
             var bufferTwo = Encoding.ASCII.GetBytes("FileReadersIntegrationTests part two");
+
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
                 using var compressedFileStreamWrapper = new CompressedFileStreamWrapper(fileStream);
-                var processedChunk = compressor.Process(buffer, buffer.Length);
+                var processedChunk = compressor.Process(bufferOne, bufferOne.Length);
                 compressedFileStreamWrapper.Write(processedChunk.Buffer, processedChunk.Size);
                 processedChunk = compressor.Process(bufferTwo, bufferTwo.Length);
                 compressedFileStreamWrapper.Write(processedChunk.Buffer, processedChunk.Size);
@@ -65,29 +65,31 @@ namespace GZipTest.Workflow.IntegrationTests
 
             var compressedBufferedFileReader = new CompressedBufferedFileReader();
             var chunks = new List<ProcessedChunk>();
+
             foreach (var chunk in compressedBufferedFileReader.Read(outputFile))
             {
                 var processedChunk = decompressor.Process(chunk.Buffer, chunk.Size);
                 chunks.Add(processedChunk);
             }
 
-            buffer.SequenceEqual(chunks[0].Buffer.Take(chunks[0].Size)).ShouldBeTrue();
-            bufferTwo.SequenceEqual(chunks[1].Buffer.Take(chunks[1].Size)).ShouldBeTrue();
+            bufferOne.SequenceShouldBeEqualTo(chunks[0]);
+            bufferTwo.SequenceShouldBeEqualTo(chunks[1]);
         }
 
         [Fact]
         public void CompressedChunksAreStoredSavedToFileAndReadBackCorrectly()
         {
-            var buffer = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
+            var bufferOne = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
             var bufferTwo = Encoding.ASCII.GetBytes("FileReadersIntegrationTests part two");
-            var combinedBuffers = new byte[buffer.Length + bufferTwo.Length];
-            Array.Copy(buffer, 0, combinedBuffers, 0, buffer.Length);
-            Array.Copy(bufferTwo, 0, combinedBuffers, buffer.Length, bufferTwo.Length);
+            var combinedBuffers = new byte[bufferOne.Length + bufferTwo.Length];
+
+            Array.Copy(bufferOne, 0, combinedBuffers, 0, bufferOne.Length);
+            Array.Copy(bufferTwo, 0, combinedBuffers, bufferOne.Length, bufferTwo.Length);
 
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
                 using var compressedFileStreamWrapper = new CompressedFileStreamWrapper(fileStream);
-                var processedChunk = compressor.Process(buffer, buffer.Length);
+                var processedChunk = compressor.Process(bufferOne, bufferOne.Length);
                 compressedFileStreamWrapper.Write(processedChunk.Buffer, processedChunk.Size);
                 processedChunk = compressor.Process(bufferTwo, bufferTwo.Length);
                 compressedFileStreamWrapper.Write(processedChunk.Buffer, processedChunk.Size);
@@ -100,8 +102,8 @@ namespace GZipTest.Workflow.IntegrationTests
                 chunks.Add(decompressor.Process(chunk.Buffer, chunk.Size));
             }
 
-            buffer.SequenceEqual(chunks[0].Buffer.Take(chunks[0].Size)).ShouldBeTrue();
-            bufferTwo.SequenceEqual(chunks[1].Buffer.Take(chunks[1].Size)).ShouldBeTrue();
+            bufferOne.SequenceShouldBeEqualTo(chunks[0]);
+            bufferTwo.SequenceShouldBeEqualTo(chunks[1]);
 
             using (var decompressedFileStream = File.Open(decompressedFile.FullName, FileMode.Create))
             {
@@ -141,8 +143,7 @@ namespace GZipTest.Workflow.IntegrationTests
                 Array.Copy(buffers[i].Buffer,0,combinedBuffer, copied, buffers[i].Size);
                 copied += buffers[i].Size;
             }
-            outputHelper.WriteLine(Encoding.ASCII.GetString(combinedBuffer));
-            outputHelper.WriteLine("buffers " + buffers.Count);
+
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
                 using var compressedFileStreamWrapper = new CompressedFileStreamWrapper(fileStream);
@@ -162,7 +163,7 @@ namespace GZipTest.Workflow.IntegrationTests
 
             for (int i = 0; i < buffers.Count; i++)
             {
-                buffers[i].Buffer.Take(buffers[i].Size).SequenceEqual(chunks[i].Buffer.Take(chunks[i].Size)).ShouldBeTrue();
+                buffers[i].SequenceShouldBeEqualTo(chunks[i]);
             }
 
             using (var decompressedFileStream = File.Open(decompressedFile.FullName, FileMode.Create))
@@ -174,9 +175,7 @@ namespace GZipTest.Workflow.IntegrationTests
                 }
             }
 
-            File.ReadAllBytes(inputFile.FullName)
-                .SequenceEqual(File.ReadAllBytes(decompressedFile.FullName))
-                .ShouldBeTrue();
+            inputFile.ShouldHaveSameContentAs(decompressedFile);
         }
     }
 }
