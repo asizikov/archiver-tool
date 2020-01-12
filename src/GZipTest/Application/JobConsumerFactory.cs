@@ -13,7 +13,7 @@ namespace GZipTest.Application
     public class JobConsumerFactory : IJobConsumerFactory
     {
         private readonly IJobContext jobContext;
-        private RecyclableMemoryStreamManager recyclableMemoryStreamManager;
+        private readonly RecyclableMemoryStreamManager recyclableMemoryStreamManager;
 
         public JobConsumerFactory(IJobContext jobContext)
         {

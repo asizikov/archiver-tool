@@ -9,14 +9,12 @@ namespace GZipTest.Compression.Tests
 {
     public class CompressionTests
     {
-        private readonly RecyclableMemoryStreamManager recyclableMemoryStreamManager;
-
         private readonly IByteProcessor compressor;
         private readonly IByteProcessor decompressor;
 
         public CompressionTests()
         {
-            recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
+            var recyclableMemoryStreamManager = new RecyclableMemoryStreamManager();
             compressor = new Compressor(recyclableMemoryStreamManager);
             decompressor = new Decompressor(recyclableMemoryStreamManager);
         }
@@ -27,9 +25,11 @@ namespace GZipTest.Compression.Tests
             const string content = "some string to be compressed";
             var buffer = Encoding.ASCII.GetBytes(content);
             var memory = new Memory<byte>(buffer);
+
             var compressed = compressor.Process(memory);
             var decompressed = decompressor.Process(compressed.Memory);
-            Encoding.ASCII.GetString(decompressed.Memory.ToArray(), 0, decompressed.Memory.Length).ShouldBe(content);
+
+            Encoding.ASCII.GetString(decompressed.Memory.Span).ShouldBe(content);
         }
 
         [Fact]
@@ -37,22 +37,23 @@ namespace GZipTest.Compression.Tests
         {
             const string content =
                 "some somewhat very looooooooooooooooooooooooooooooooooooooooooooooooooong string to be compressed";
-            var buffer = Encoding.ASCII.GetBytes(content);
-            var first = new byte[buffer.Length / 2];
-            var second = new byte[buffer.Length - first.Length];
-            Array.Copy(buffer, 0, first, 0, first.Length);
-            Array.Copy(buffer, first.Length, second, 0, second.Length);
+            var buffer = new Memory<byte>(Encoding.ASCII.GetBytes(content));
 
-            var firstCompressed = compressor.Process(new Memory<byte>(first));
-            var secondCompressed = compressor.Process(new Memory<byte>(second));
+            var first = buffer.Slice(0, buffer.Length/2);
+            var second = buffer.Slice(first.Length, buffer.Length - first.Length);
+
+            var firstCompressed = compressor.Process(first);
+            var secondCompressed = compressor.Process(second);
 
             var firstDecompressed = decompressor.Process(firstCompressed.Memory);
             var secondDecompressed = decompressor.Process(secondCompressed.Memory);
 
-            var result = new byte[firstDecompressed.Memory.Length + secondDecompressed.Memory.Length];
-            Array.Copy(firstDecompressed.Memory.ToArray(), 0, result, 0, firstDecompressed.Memory.Length);
-            Array.Copy(secondDecompressed.Memory.ToArray(), 0, result, firstDecompressed.Memory.Length, secondDecompressed.Memory.Length);
+            Span<byte> result = stackalloc byte[firstDecompressed.Memory.Length + secondDecompressed.Memory.Length];
+            firstDecompressed.Memory.Span.CopyTo(result.Slice(0,firstDecompressed.Memory.Length));
+            secondDecompressed.Memory.Span.CopyTo(result.Slice(firstDecompressed.Memory.Length, secondDecompressed.Memory.Length));
+
             Encoding.ASCII.GetString(result).ShouldBe(content);
         }
     }
+
 }
