@@ -53,10 +53,10 @@ namespace GZipTest.Workflow
             {
                 using var cancellationTokenSource = new CancellationTokenSource();
                 using var jobQueue = new BlockingCollection<FileChunk>(new ConcurrentQueue<FileChunk>(),
-                    chunkProcessorPool.Length * options.Value.QueueMultiplier);
+                    chunkProcessorPool.Length * options.Value.InputQueueMultiplier);
                 using var processedJobQueue = new BlockingCollection<ProcessedBatchItem>(
                     new OrderedConcurrentDictionaryWrapper(),
-                    chunkProcessorPool.Length * options.Value.QueueMultiplier);
+                    chunkProcessorPool.Length * options.Value.OutputQueueMultiplier);
 
                 logger.LogInformation(
                     $"File will be processed by {chunkProcessorPool.Length} threads with max input job queue size {jobQueue.BoundedCapacity}");

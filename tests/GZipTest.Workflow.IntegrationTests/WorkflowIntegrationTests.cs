@@ -28,8 +28,9 @@ namespace GZipTest.Workflow.IntegrationTests
             var builder = new ConfigurationBuilder();
             builder.AddInMemoryCollection(new Dictionary<string, string>
             {
-                {"Batching:ParallelWorkers", "100"},
-                {"Batching:QueueMultiplier", "10"},
+                {$"{nameof(Batching)}:{nameof(Batching.ParallelWorkers)}", "100"},
+                {$"{nameof(Batching)}:{nameof(Batching.OutputQueueMultiplier)}", "10"},
+                {$"{nameof(Batching)}:{nameof(Batching.InputQueueMultiplier)}", "2"},
             });
 
             var config = builder.Build();
