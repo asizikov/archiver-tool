@@ -81,10 +81,10 @@ namespace GZipTest.Workflow.IntegrationTests
         {
             var bufferOne = Encoding.ASCII.GetBytes("FileReadersIntegrationTests");
             var bufferTwo = Encoding.ASCII.GetBytes("FileReadersIntegrationTests part two");
-            var combinedBuffers = new byte[bufferOne.Length + bufferTwo.Length];
 
-            Array.Copy(bufferOne, 0, combinedBuffers, 0, bufferOne.Length);
-            Array.Copy(bufferTwo, 0, combinedBuffers, bufferOne.Length, bufferTwo.Length);
+            Span<byte> combinedBuffers = stackalloc byte[bufferOne.Length + bufferTwo.Length];
+            bufferOne.AsSpan().CopyTo(combinedBuffers.Slice(0, bufferOne.Length));
+            bufferTwo.AsSpan().CopyTo(combinedBuffers.Slice(bufferOne.Length, bufferTwo.Length));
 
             using (var fileStream = File.Open(outputFile.FullName, FileMode.Create))
             {
@@ -136,11 +136,12 @@ namespace GZipTest.Workflow.IntegrationTests
                 buffers.Add(buffer);
             }
 
-            var combinedBuffer = new byte[buffers.Sum(b => b.Memory.Length)];
+            int combinedSize = buffers.Sum(b => b.Memory.Length);
+            var combinedBuffer = combinedSize <= 1024 ? stackalloc byte[combinedSize] : new byte[combinedSize];
             var copied = 0;
-            for (int i = 0; i < buffers.Count; i++)
+            for (var i = 0; i < buffers.Count; i++)
             {
-                Array.Copy(buffers[i].Memory.Span.ToArray(), 0, combinedBuffer, copied, buffers[i].Memory.Length);
+                buffers[i].Memory.Span.CopyTo(combinedBuffer.Slice(copied, buffers[i].Memory.Length));
                 copied += buffers[i].Memory.Length;
             }
 

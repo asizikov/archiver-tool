@@ -55,5 +55,4 @@ namespace GZipTest.Compression.Tests
             Encoding.ASCII.GetString(result).ShouldBe(content);
         }
     }
-
 }

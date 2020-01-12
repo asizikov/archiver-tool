@@ -12,14 +12,11 @@ namespace GZipTest.Workflow.IntegrationTests.Utils
         public static void SequenceShouldBeEqualTo(this Span<byte> span, FileChunk chunk)
             => span.SequenceEqual(chunk.Memory.Span).ShouldBeTrue();
 
-        public static void SequenceShouldBeEqualTo(this Span<byte> span, ProcessedChunk chunk)
-            => span.SequenceEqual(chunk.Memory.Span).ShouldBeTrue();
-
         public static void SequenceShouldBeEqualTo(this byte[] array, ProcessedChunk chunk)
-            => array.SequenceEqual(chunk.Memory.Span.ToArray()).ShouldBeTrue();
+            => array.AsSpan().SequenceEqual(chunk.Memory.Span).ShouldBeTrue();
 
         public static void SequenceShouldBeEqualTo(this FileChunk fileChunk, ProcessedChunk processedChunk)
-            => fileChunk.Memory.ToArray().SequenceEqual(processedChunk.Memory.ToArray())
+            => fileChunk.Memory.Span.SequenceEqual(processedChunk.Memory.Span)
                 .ShouldBeTrue();
 
         public static void ShouldHaveSameContentAs(this FileInfo fileOne, FileInfo fileTwo)
