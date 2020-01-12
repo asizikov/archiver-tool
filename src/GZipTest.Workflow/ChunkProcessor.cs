@@ -56,9 +56,9 @@ namespace GZipTest.Workflow
                     var processed = new ProcessedBatchItem
                     {
                         JobBatchItemId = jobBatchItem.JobBatchItemId,
-                        Processed = byteProcessor.Process(jobBatchItem.Buffer, jobBatchItem.Size)
+                        Processed = byteProcessor.Process(jobBatchItem.Memory)
                     };
-                    ArrayPool<byte>.Shared.Return(jobBatchItem.Buffer);
+                    jobBatchItem.ReleaseBuffer();
 
                     if (!cancellationToken.IsCancellationRequested)
                     {

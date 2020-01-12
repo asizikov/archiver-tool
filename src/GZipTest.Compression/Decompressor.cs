@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.IO.Compression;
 using Microsoft.IO;
 
@@ -13,24 +14,25 @@ namespace GZipTest.Compression
             this.recyclableMemoryStreamManager = recyclableMemoryStreamManager;
         }
 
-        public ProcessedChunk Process(byte[] input, int bufferSize)
+        public ProcessedChunk Process(Memory<byte> memory)
         {
             using var compressedMemoryStream = recyclableMemoryStreamManager.GetStream();
-            compressedMemoryStream.Write(input, 0, bufferSize);
+            compressedMemoryStream.Write(memory.Span);
             compressedMemoryStream.Position = 0;
 
             using var zipStream = new GZipStream(compressedMemoryStream, CompressionMode.Decompress);
             using var resultStream = recyclableMemoryStreamManager.GetStream();
-            
+
             zipStream.CopyTo(resultStream);
             zipStream.Flush();
             resultStream.Position = 0;
-            
+
             var size = (int) resultStream.Length;
+
             var bytes = ArrayPool<byte>.Shared.Rent(size);
-            
-            resultStream.Read(bytes, 0, size);
-            return new ProcessedChunk(bytes, size);
+            var outMemory = new Memory<byte>(bytes);
+            var read = resultStream.Read(outMemory.Span);
+            return new ProcessedChunk(bytes, outMemory.Slice(0, read));
         }
     }
 }

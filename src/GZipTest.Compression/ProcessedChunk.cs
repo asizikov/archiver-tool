@@ -1,14 +1,18 @@
-﻿namespace GZipTest.Compression
+﻿using System;
+using System.Buffers;
+
+namespace GZipTest.Compression
 {
     public struct ProcessedChunk
     {
-        public ProcessedChunk(byte[] buffer, int size)
+        private byte[] buffer;
+        public ProcessedChunk(byte[] buffer, in Memory<byte> memory)
         {
-            Buffer = buffer;
-            Size = size;
+            this.buffer = buffer;
+            Memory = memory;
         }
 
-        public byte[] Buffer { get; set; }
-        public int Size { get; set; }
+        public Memory<byte> Memory { get; }
+        public void ReturnBuffer() => ArrayPool<byte>.Shared.Return(buffer);
     }
 }

@@ -52,14 +52,19 @@ namespace GZipTest.Workflow
             using (var countdown = new CountdownEvent(1))
             {
                 using var cancellationTokenSource = new CancellationTokenSource();
-                using var jobQueue = new BlockingCollection<FileChunk>(new ConcurrentQueue<FileChunk>(), chunkProcessorPool.Length * options.Value.QueueMultiplier);
-                using var processedJobQueue = new BlockingCollection<ProcessedBatchItem>(new OrderedConcurrentDictionaryWrapper(), chunkProcessorPool.Length * options.Value.QueueMultiplier);
+                using var jobQueue = new BlockingCollection<FileChunk>(new ConcurrentQueue<FileChunk>(),
+                    chunkProcessorPool.Length * options.Value.QueueMultiplier);
+                using var processedJobQueue = new BlockingCollection<ProcessedBatchItem>(
+                    new OrderedConcurrentDictionaryWrapper(),
+                    chunkProcessorPool.Length * options.Value.QueueMultiplier);
 
-                logger.LogInformation($"File will be processed by {chunkProcessorPool.Length} threads with max input job queue size {jobQueue.BoundedCapacity}");
+                logger.LogInformation(
+                    $"File will be processed by {chunkProcessorPool.Length} threads with max input job queue size {jobQueue.BoundedCapacity}");
                 var outputBuffer = outputBufferFactory.Create(processedJobQueue, chunkProcessorPool.Length);
                 for (var i = 0; i < chunkProcessorPool.Length; i++)
                 {
-                    chunkProcessorPool[i] = jobConsumerFactory.Create(jobQueue, outputBuffer, countdown, cancellationTokenSource);
+                    chunkProcessorPool[i] =
+                        jobConsumerFactory.Create(jobQueue, outputBuffer, countdown, cancellationTokenSource);
                     chunkProcessorPool[i].Start(cancellationTokenSource.Token);
                 }
 
@@ -72,7 +77,9 @@ namespace GZipTest.Workflow
                 countdown.Signal();
                 countdown.Wait();
             }
-            logger.LogInformation($"Completed processing of file. Submitted {jobContext.SubmittedId} chunks. Processed {jobContext.ProcessedId} chunks");
+
+            logger.LogInformation(
+                $"Completed processing of file. Submitted {jobContext.SubmittedId} chunks. Processed {jobContext.ProcessedId} chunks");
             jobContext.ElapsedTimeMilliseconds = stopWatch.ElapsedMilliseconds;
         }
     }

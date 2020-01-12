@@ -19,7 +19,8 @@ namespace GZipTest.Workflow
         private long batchItemId = 0;
         private CancellationTokenSource cancellationTokenSource;
 
-        public JobProducer(IFileReaderFactory fileReaderFactory, IJobContext jobContext, BlockingCollection<FileChunk> queue, FileInfo fileInfo,
+        public JobProducer(IFileReaderFactory fileReaderFactory, IJobContext jobContext,
+            BlockingCollection<FileChunk> queue, FileInfo fileInfo,
             CountdownEvent countdown)
         {
             this.fileReaderFactory = fileReaderFactory;
@@ -64,6 +65,7 @@ namespace GZipTest.Workflow
             {
                 countdown.Signal();
             }
+
             queue.CompleteAdding();
         }
     }

@@ -1,4 +1,3 @@
 ﻿namespace GZipTest.Workflow
 {
-
 }

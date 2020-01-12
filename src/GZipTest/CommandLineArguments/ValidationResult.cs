@@ -4,7 +4,7 @@ namespace GZipTest.CommandLineArguments
 {
     public class ValidationResult
     {
-        public bool IsValid {get; set;}
-        public List<string> Errors {get; } = new List<string>();
+        public bool IsValid { get; set; }
+        public List<string> Errors { get; } = new List<string>();
     }
 }

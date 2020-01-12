@@ -17,7 +17,7 @@ namespace GZipTest
             var services = ConfigureServices();
             using var serviceProvider = services.BuildServiceProvider();
             serviceProvider.GetService<IApplicationFlow>().Run(args);
-            return (int)ExecutionResult.Success;
+            return (int) ExecutionResult.Success;
         }
 
         private static IServiceCollection ConfigureServices()
@@ -29,10 +29,10 @@ namespace GZipTest
                 .AddApplicationServices()
                 .AddOptions()
                 .AddLogging(logging =>
-            {
-                logging.AddConfiguration(config.GetSection("Logging"));
-                logging.AddConsole();
-            })
+                {
+                    logging.AddConfiguration(config.GetSection("Logging"));
+                    logging.AddConsole();
+                })
                 .Configure<Batching>(config.GetSection("Batching"))
                 .Configure<LoggerFilterOptions>(options => options.MinLevel = LogLevel.Information);
 

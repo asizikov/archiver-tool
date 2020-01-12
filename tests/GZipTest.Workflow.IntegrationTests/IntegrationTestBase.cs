@@ -26,7 +26,7 @@ namespace GZipTest.Workflow.IntegrationTests
             {
                 Directory.CreateDirectory(tempPath);
             }
-            
+
             using var readStream = embeddedFile.CreateReadStream();
             var tempFile = Path.Combine(tempPath, $"testFile{DateTime.Now.Ticks}.bin");
             using var fileStream = File.Create(tempFile);

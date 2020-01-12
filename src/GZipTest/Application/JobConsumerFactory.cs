@@ -21,10 +21,14 @@ namespace GZipTest.Application
             this.jobContext = jobContext;
         }
 
-        public ChunkProcessor Create(BlockingCollection<FileChunk> jobQueue, IOutputBuffer outputBuffer, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
+        public ChunkProcessor Create(BlockingCollection<FileChunk> jobQueue, IOutputBuffer outputBuffer,
+            CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
         {
-            var processor = jobContext.Operation == Operation.Compress ? new Compressor(recyclableMemoryStreamManager) as IByteProcessor : new Decompressor(recyclableMemoryStreamManager);
-            return new ChunkProcessor(jobQueue, outputBuffer, processor, jobContext, cancellationTokenSource, countdown);
+            var processor = jobContext.Operation == Operation.Compress
+                ? new Compressor(recyclableMemoryStreamManager) as IByteProcessor
+                : new Decompressor(recyclableMemoryStreamManager);
+            return new ChunkProcessor(jobQueue, outputBuffer, processor, jobContext, cancellationTokenSource,
+                countdown);
         }
     }
 }

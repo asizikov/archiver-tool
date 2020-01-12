@@ -15,7 +15,9 @@ namespace GZipTest.Workflow.Factories
             this.jobContext = jobContext;
             this.fileWriter = fileWriter;
         }
-        public ProcessedJobsConsumer Create(BlockingCollection<ProcessedBatchItem> processedJobQueue, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource) 
+
+        public ProcessedJobsConsumer Create(BlockingCollection<ProcessedBatchItem> processedJobQueue,
+            CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
             => new ProcessedJobsConsumer(processedJobQueue, jobContext, fileWriter, countdown, cancellationTokenSource);
     }
 }

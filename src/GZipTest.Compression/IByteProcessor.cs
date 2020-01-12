@@ -1,7 +1,9 @@
-﻿namespace GZipTest.Compression
+﻿using System;
+
+namespace GZipTest.Compression
 {
     public interface IByteProcessor
     {
-        ProcessedChunk Process(byte[] input, int bufferSize);
+        ProcessedChunk Process(Memory<byte> memory);
     }
 }

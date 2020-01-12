@@ -1,24 +1,26 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 
 namespace GZipTest.IO
 {
-    public class UncompressedBufferedFileReader :IFileReader
+    public class UncompressedBufferedFileReader : IFileReader
     {
         private const int SIZE = 1024 * 1024;
 
         public IEnumerable<FileChunk> Read(FileInfo path)
         {
             using var fileStream = path.OpenRead();
-            using var binaryReader = new BinaryReader(fileStream);
-
+            var readBytes = 0;
             do
             {
                 var buffer = ArrayPool<byte>.Shared.Rent(SIZE);
-                var bufferSize = binaryReader.Read(buffer, 0, SIZE);
-                yield return new FileChunk(buffer, bufferSize);
-            } while (binaryReader.BaseStream.Length > binaryReader.BaseStream.Position);
+                var memory = new Memory<byte>(buffer, 0, buffer.Length);
+
+                readBytes = fileStream.Read(memory.Span);
+                yield return new FileChunk(buffer, memory.Slice(0, readBytes));
+            } while (readBytes != 0);
         }
     }
 }

@@ -34,7 +34,8 @@ namespace GZipTest.Application
             var validationResult = commandLineValidator.Validate(args);
             if (!validationResult.IsValid)
             {
-                logger.LogInformation($"invalid command line arguments {string.Join(Environment.NewLine, validationResult.Errors)}");
+                logger.LogInformation(
+                    $"invalid command line arguments {string.Join(Environment.NewLine, validationResult.Errors)}");
                 PrintHelp();
                 return;
             }

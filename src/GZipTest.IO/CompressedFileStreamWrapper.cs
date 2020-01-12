@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace GZipTest.IO
 {
@@ -15,13 +16,14 @@ namespace GZipTest.IO
 
         public void Dispose()
         {
-            writer.Dispose();
+            writer?.Dispose();
+            stream?.Dispose();
         }
 
-        public void Write(byte[] buffer, int size)
+        public void Write(ReadOnlySpan<byte> buffer)
         {
-            writer.Write(size);
-            writer.Write(buffer, 0, size);
+            writer.Write(buffer.Length);
+            writer.Write(buffer);
         }
     }
 }

@@ -1,16 +1,22 @@
-﻿namespace GZipTest.IO
+﻿using System;
+using System.Buffers;
+
+namespace GZipTest.IO
 {
     public struct FileChunk
     {
-        public FileChunk(byte[] buffer, int size)
+        private byte[] buffer;
+
+        public FileChunk(byte[] buffer, Memory<byte> memory)
         {
-            Buffer = buffer;
-            Size = size;
+            this.buffer = buffer;
+            Memory = memory;
             JobBatchItemId = 0;
         }
 
-        public byte[] Buffer { get; set; }
-        public int Size { get; set; }
+        public Memory<byte> Memory { get; }
         public long JobBatchItemId { get; set; }
+
+        public void ReleaseBuffer() => ArrayPool<byte>.Shared.Return(buffer);
     }
 }

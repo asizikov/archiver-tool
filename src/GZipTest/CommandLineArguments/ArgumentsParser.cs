@@ -7,9 +7,9 @@ namespace GZipTest.CommandLineArguments
     {
         public JobDescription Parse(string[] args)
         {
-            return new JobDescription 
+            return new JobDescription
             {
-                Operation = args[0].ToLower() ==  "compress" ? Operation.Compress : Operation.Decompress,
+                Operation = args[0].ToLower() == "compress" ? Operation.Compress : Operation.Decompress,
                 InputFile = new FileInfo(args[1]),
                 OutputFile = new FileInfo(args[2])
             };

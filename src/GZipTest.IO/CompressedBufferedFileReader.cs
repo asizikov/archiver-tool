@@ -1,4 +1,5 @@
-﻿using System.Buffers;
+﻿using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 
@@ -10,30 +11,22 @@ namespace GZipTest.IO
         {
             using var fileStream = path.OpenRead();
             using var binaryReader = new BinaryReader(fileStream);
-
-            var size = binaryReader.ReadInt32();
-            var buffer = ArrayPool<byte>.Shared.Rent(size);
-            var bufferSize = binaryReader.Read(buffer, 0, size);
-            while (bufferSize > 0)
+            var readBytes = 0;
+            do
             {
-                if (bufferSize == size)
+                var size = binaryReader.ReadInt32();
+                var buffer = ArrayPool<byte>.Shared.Rent(size);
+                var memory = new Memory<byte>(buffer, 0, size);
+                readBytes = binaryReader.Read(memory.Span);
+                if (readBytes == size)
                 {
-                    yield return new FileChunk(buffer, size);
+                    yield return new FileChunk(buffer, memory.Slice(0, readBytes));
                 }
                 else
                 {
                     throw new IOException("Unexpected end of file");
                 }
-
-                if (binaryReader.BaseStream.Position == binaryReader.BaseStream.Length)
-                {
-                    yield break;
-                }
-
-                size = binaryReader.ReadInt32();
-                buffer = ArrayPool<byte>.Shared.Rent(size);
-                bufferSize = binaryReader.Read(buffer, 0, size);
-            }
+            } while (binaryReader.BaseStream.Position < binaryReader.BaseStream.Length);
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Threading;
 using GZipTest.Compression;
@@ -40,12 +41,12 @@ namespace GZipTest.Workflow.Tests
             var inputThread = new Thread(() =>
             {
                 countdownEvent.AddCount();
-                var good = new byte[] { };
-                var faulty = new byte[] { };
-                processor.Setup(p => p.Process(good, 0)).Returns(new ProcessedChunk(new byte[] { }, 0));
-                inputQueue.Add(new FileChunk {Buffer = good});
-                processor.Setup(p => p.Process(faulty, 0)).Throws<Exception>();
-                inputQueue.Add(new FileChunk {Buffer = faulty});
+                var good = Memory<byte>.Empty;
+                var faulty = Memory<byte>.Empty;
+                processor.Setup(p => p.Process(good)).Returns(new ProcessedChunk(new byte[] { }, Memory<byte>.Empty));
+                inputQueue.Add(new FileChunk(ArrayPool<byte>.Shared.Rent(0), good));
+                processor.Setup(p => p.Process(faulty)).Throws<Exception>();
+                inputQueue.Add(new FileChunk(ArrayPool<byte>.Shared.Rent(0),faulty));
                 inputQueue.CompleteAdding();
                 countdownEvent.Signal();
             });
@@ -53,6 +54,7 @@ namespace GZipTest.Workflow.Tests
             countdownEvent.Signal();
             countdownEvent.Wait();
             jobContextMock.Verify(
+                // ReSharper disable once ExplicitCallerInfoArgument
                 context => context.Failure(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<string>()), Times.Once);
             outputBufferMock.Verify(buffer => buffer.SubmitCompleted(), Times.Once);
             cancellationTokenSource.IsCancellationRequested.ShouldBeTrue();
@@ -61,10 +63,10 @@ namespace GZipTest.Workflow.Tests
         [Fact]
         public void AbortsWhenCancellationRequested()
         {
-            var good = new ProcessedChunk(new byte[] { }, 0);
-            var result = new ProcessedChunk(new byte[] { }, 0);
-            processor.Setup(p => p.Process(good.Buffer,good.Size)).Returns(result);
-            inputQueue.Add(new FileChunk( good.Buffer, good.Size));
+            var good = new ProcessedChunk(new byte[] { },  Memory<byte>.Empty);
+            var result = new ProcessedChunk(new byte[] { }, Memory<byte>.Empty);
+            processor.Setup(p => p.Process(good.Memory)).Returns(result);
+            inputQueue.Add(new FileChunk(ArrayPool<byte>.Shared.Rent(0),good.Memory));
             cancellationTokenSource.Cancel();
 
             chunkProcessor.Start(cancellationTokenSource.Token);
@@ -74,7 +76,8 @@ namespace GZipTest.Workflow.Tests
             jobContextMock.Verify(
                 context => context.Failure(It.IsAny<Exception>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             outputBufferMock.Verify(buffer => buffer.SubmitCompleted(), Times.Once);
-            outputBufferMock.Verify(buffer => buffer.SubmitProcessedBatchItem(It.IsAny<ProcessedBatchItem>()), Times.Never);
+            outputBufferMock.Verify(buffer => buffer.SubmitProcessedBatchItem(It.IsAny<ProcessedBatchItem>()),
+                Times.Never);
         }
 
         public void Dispose()

@@ -2,8 +2,8 @@
 
 namespace GZipTest.IO
 {
-    public interface IFile: IDisposable
+    public interface IFile : IDisposable
     {
-        void Write(byte[] buffer, int size);
+        void Write(ReadOnlySpan<byte> buffer);
     }
 }

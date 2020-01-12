@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using Microsoft.IO;
 using Shouldly;
@@ -25,31 +26,32 @@ namespace GZipTest.Compression.Tests
         {
             const string content = "some string to be compressed";
             var buffer = Encoding.ASCII.GetBytes(content);
-
-            var compressed = compressor.Process(buffer, buffer.Length);
-            var decompressed = decompressor.Process(compressed.Buffer, compressed.Size);
-            Encoding.ASCII.GetString(decompressed.Buffer,0,decompressed.Size).ShouldBe(content);
+            var memory = new Memory<byte>(buffer);
+            var compressed = compressor.Process(memory);
+            var decompressed = decompressor.Process(compressed.Memory);
+            Encoding.ASCII.GetString(decompressed.Memory.ToArray(), 0, decompressed.Memory.Length).ShouldBe(content);
         }
 
         [Fact]
         public void CompressDecompressInChunksProducesCorrectResult()
         {
-            const string content = "some somewhat very looooooooooooooooooooooooooooooooooooooooooooooooooong string to be compressed";
+            const string content =
+                "some somewhat very looooooooooooooooooooooooooooooooooooooooooooooooooong string to be compressed";
             var buffer = Encoding.ASCII.GetBytes(content);
             var first = new byte[buffer.Length / 2];
             var second = new byte[buffer.Length - first.Length];
             Array.Copy(buffer, 0, first, 0, first.Length);
             Array.Copy(buffer, first.Length, second, 0, second.Length);
 
-            var firstCompressed = compressor.Process(first, first.Length);
-            var secondCompressed = compressor.Process(second, second.Length);
+            var firstCompressed = compressor.Process(new Memory<byte>(first));
+            var secondCompressed = compressor.Process(new Memory<byte>(second));
 
-            var firstDecompressed = decompressor.Process(firstCompressed.Buffer, firstCompressed.Size);
-            var secondDecompressed = decompressor.Process(secondCompressed.Buffer, secondCompressed.Size);
+            var firstDecompressed = decompressor.Process(firstCompressed.Memory);
+            var secondDecompressed = decompressor.Process(secondCompressed.Memory);
 
-            var result = new byte[firstDecompressed.Size + secondDecompressed.Size];
-            Array.Copy(firstDecompressed.Buffer, 0, result, 0, firstDecompressed.Size);
-            Array.Copy(secondDecompressed.Buffer, 0, result, firstDecompressed.Size, secondDecompressed.Size);
+            var result = new byte[firstDecompressed.Memory.Length + secondDecompressed.Memory.Length];
+            Array.Copy(firstDecompressed.Memory.ToArray(), 0, result, 0, firstDecompressed.Memory.Length);
+            Array.Copy(secondDecompressed.Memory.ToArray(), 0, result, firstDecompressed.Memory.Length, secondDecompressed.Memory.Length);
             Encoding.ASCII.GetString(result).ShouldBe(content);
         }
     }

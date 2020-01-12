@@ -6,7 +6,7 @@ namespace GZipTest.CommandLineArguments
 {
     public sealed class CommandLineValidator : ICommandLineValidator
     {
-        private readonly ISet<string> expectedCommands = new HashSet<string>(new[] { "compress", "decompress" });
+        private readonly ISet<string> expectedCommands = new HashSet<string>(new[] {"compress", "decompress"});
 
         public ValidationResult Validate(string[] args)
         {
@@ -45,7 +45,7 @@ namespace GZipTest.CommandLineArguments
                 var fileName = args[2];
                 try
                 {
-                   _ = new FileInfo(fileName);
+                    _ = new FileInfo(fileName);
                 }
                 catch (Exception ex)
                 {

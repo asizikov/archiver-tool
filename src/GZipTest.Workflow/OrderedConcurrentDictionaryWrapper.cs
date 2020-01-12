@@ -10,7 +10,9 @@ namespace GZipTest.Workflow
     {
         private readonly object syncObject = new object();
 
-        private readonly ConcurrentDictionary<long, ProcessedBatchItem> processedJobs = new ConcurrentDictionary<long, ProcessedBatchItem>();
+        private readonly ConcurrentDictionary<long, ProcessedBatchItem> processedJobs =
+            new ConcurrentDictionary<long, ProcessedBatchItem>();
+
         private long lastTakenJobId = -1;
 
         public IEnumerator<ProcessedBatchItem> GetEnumerator()
@@ -48,6 +50,7 @@ namespace GZipTest.Workflow
                     lastTakenJobId++;
                     return true;
                 }
+
                 return false;
             }
         }

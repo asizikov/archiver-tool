@@ -19,10 +19,11 @@ namespace GZipTest.Workflow.Tests
         public void CompletesWorkWhenAllWorkersAreDone()
         {
             queue.IsCompleted.ShouldBeFalse();
-            for (var i = 0; i < workers -1; i++)
+            for (var i = 0; i < workers - 1; i++)
             {
                 buffer.SubmitCompleted();
             }
+
             queue.IsCompleted.ShouldBeFalse();
             buffer.SubmitCompleted();
             queue.IsCompleted.ShouldBeTrue();

@@ -20,7 +20,8 @@ namespace GZipTest.Workflow
         private CancellationToken cancellationToken;
         private FileInfo fileInfo;
 
-        public ProcessedJobsConsumer(BlockingCollection<ProcessedBatchItem> processedJobQueue, IJobContext jobContext, IFileWriter fileWriter, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
+        public ProcessedJobsConsumer(BlockingCollection<ProcessedBatchItem> processedJobQueue, IJobContext jobContext,
+            IFileWriter fileWriter, CountdownEvent countdown, CancellationTokenSource cancellationTokenSource)
         {
             this.processedJobQueue = processedJobQueue;
             this.jobContext = jobContext;
@@ -52,8 +53,8 @@ namespace GZipTest.Workflow
                     if (!cancellationToken.IsCancellationRequested)
                     {
                         jobContext.ProcessedId = processedBatchItem.JobBatchItemId;
-                        file.Write(processedBatchItem.Processed.Buffer, processedBatchItem.Processed.Size);
-                        ArrayPool<byte>.Shared.Return(processedBatchItem.Processed.Buffer);
+                        file.Write(processedBatchItem.Processed.Memory.Span);
+                        processedBatchItem.Processed.ReturnBuffer();
                     }
                     else
                     {
